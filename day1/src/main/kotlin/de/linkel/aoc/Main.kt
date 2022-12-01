@@ -1,14 +1,17 @@
+package de.linkel.aoc
+
 import java.io.File
 
 fun main(args: Array<String>) {
+    val topCount = 3
     File(args.firstOrNull() ?: "input.txt").bufferedReader().use { reader ->
         reader.useLines { sequence ->
-            val sorted = sequence
-                .fold(Pair(0, emptyList<Int>())) { state, line ->
+            val top = sequence
+                .fold(Pair(0, TopList<Int>(topCount))) { state, line ->
                     if (line.isEmpty()) {
                         state.copy(
                             first = 0,
-                            second = state.second + listOf(state.first)
+                            second = state.second + state.first
                         )
                     } else {
                         state.copy(
@@ -17,14 +20,10 @@ fun main(args: Array<String>) {
                     }
                 }
                 .let { state ->
-                    state.second + listOf(state.first)
+                    state.second + state.first
                 }
-                .sortedDescending()
-            val max = sorted.first()
-            val top3 = sorted.take(3).sum()
-            assert(max == 72511)
-            println("max: $max")
-            println("top3: $top3")
+            println("max: ${top.first()}")
+            println("top3: ${top.sum()}")
         }
     }
 }
