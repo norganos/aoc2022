@@ -1,0 +1,16 @@
+.gradle
+build
+.idea
+.idea/**
+*.iws
+*.iml
+*.ipr
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.vscode
+.DS_Store
