@@ -1,10 +1,11 @@
 package de.linkel.aoc
 
+import de.linkel.aoc.utils.TopList
 import java.io.File
 
 fun main(args: Array<String>) {
     val topCount = 3
-    File(args.firstOrNull() ?: "input.txt").bufferedReader().use { reader ->
+    File(args.firstOrNull() ?: "input01.txt").bufferedReader().use { reader ->
         reader.useLines { sequence ->
             val top = sequence
                 .fold(Pair(0, TopList<Int>(topCount))) { state, line ->

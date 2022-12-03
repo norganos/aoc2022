@@ -1,4 +1,4 @@
-package de.linkel.aoc
+package de.linkel.aoc.utils
 
 class TopList<T>(
     private val capacity: Int,
