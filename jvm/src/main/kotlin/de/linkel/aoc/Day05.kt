@@ -50,7 +50,6 @@ class Day05: AdventDay {
         }
     }
 
-
     class Stack {
         private val content = mutableListOf<Char>()
 

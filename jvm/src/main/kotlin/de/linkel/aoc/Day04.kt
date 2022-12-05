@@ -3,15 +3,18 @@ package de.linkel.aoc
 import de.linkel.aoc.utils.Input
 import jakarta.inject.Singleton
 
-fun IntRange.contains(range: IntRange): Boolean {
-    return this.contains(range.first) && this.contains(range.last)
-}
-fun IntRange.overlaps(range: IntRange): Boolean {
-    return this.contains(range.first) || this.contains(range.last)
-}
 
 @Singleton
 class Day04: AdventDay {
+    companion object {
+        private fun IntRange.contains(range: IntRange): Boolean {
+            return this.contains(range.first) && this.contains(range.last)
+        }
+        private fun IntRange.overlaps(range: IntRange): Boolean {
+            return this.contains(range.first) || this.contains(range.last)
+        }
+    }
+
     override val day = 4
 
     override fun solve(args: List<String>) {
