@@ -1,11 +1,11 @@
 package de.linkel.aoc
 
-import de.linkel.aoc.utils.Input
+import de.linkel.aoc.base.AbstractFileAdventDay
 import jakarta.inject.Singleton
 import java.io.BufferedReader
 
 @Singleton
-class Day05: AdventDay {
+class Day05: AbstractFileAdventDay() {
     override val day = 5
 
     private fun loadStacks(reader: BufferedReader): Map<String, Stack> {
@@ -32,21 +32,19 @@ class Day05: AdventDay {
         return stacks.associate { it.name to it.stack }
     }
 
-    override fun solve(args: List<String>) {
-        Input.from(args, "input05.txt").use { reader ->
-            val stacks = loadStacks(reader)
-            reader.useLines { sequence ->
-                sequence.forEach { line ->
-                    val tokens = line.trim().split(" ")
-                    assert(tokens.size == 6)
-                    assert(tokens[0] == "move")
-                    assert(tokens[2] == "from")
-                    assert(tokens[4] == "to")
-                    stacks[tokens[3]]!!.move(to = stacks[tokens[5]]!!, count = tokens[1].toInt())
-                }
-                val tops = stacks.keys.sorted().map { stacks[it]!!.top  }.joinToString("")
-                println("tops: $tops")
+    override fun process(reader: BufferedReader) {
+        val stacks = loadStacks(reader)
+        reader.useLines { sequence ->
+            sequence.forEach { line ->
+                val tokens = line.trim().split(" ")
+                assert(tokens.size == 6)
+                assert(tokens[0] == "move")
+                assert(tokens[2] == "from")
+                assert(tokens[4] == "to")
+                stacks[tokens[3]]!!.move(to = stacks[tokens[5]]!!, count = tokens[1].toInt())
             }
+            val tops = stacks.keys.sorted().map { stacks[it]!!.top  }.joinToString("")
+            println("tops: $tops")
         }
     }
 
@@ -73,6 +71,7 @@ class Day05: AdventDay {
             to.put(tmp)
         }
 
+        @Suppress("unused")
         fun put(box: Char) {
             content.add(0, box)
         }

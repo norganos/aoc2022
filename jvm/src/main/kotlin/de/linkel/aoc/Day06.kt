@@ -1,25 +1,25 @@
 package de.linkel.aoc
 
-import de.linkel.aoc.utils.Input
+import de.linkel.aoc.base.AbstractFileAdventDay
 import de.linkel.aoc.utils.ReaderSequence
 import jakarta.inject.Singleton
+import java.io.BufferedReader
 import java.io.Reader
 
 @Singleton
-class Day06: AdventDay {
+class Day06: AbstractFileAdventDay() {
     override val day = 6
 
-    override fun solve(args: List<String>) {
-        Input.from(args, "input06.txt").use { reader ->
-            val buffer = CharBuffer(14)
-            val found = reader.charSequence().indexOfFirst { char ->
-                buffer.append(char)
-                buffer.full && buffer.content.distinct().size == 14
-            }
-
-            println("start-of-message marker after ${found+1} characters")
+    override fun process(reader: BufferedReader) {
+        val buffer = CharBuffer(14)
+        val found = reader.charSequence().indexOfFirst { char ->
+            buffer.append(char)
+            buffer.full && buffer.content.distinct().size == 14
         }
+
+        println("start-of-message marker after ${found+1} characters")
     }
+
 
     class CharBuffer(
         val size: Int,

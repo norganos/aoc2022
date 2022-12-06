@@ -1,11 +1,11 @@
 package de.linkel.aoc
 
-import de.linkel.aoc.utils.Input
+import de.linkel.aoc.base.AbstractLinesAdventDay
 import jakarta.inject.Singleton
 
 
 @Singleton
-class Day02: AdventDay {
+class Day02: AbstractLinesAdventDay() {
     override val day = 2
 
     val defeats = mapOf(
@@ -47,19 +47,15 @@ class Day02: AdventDay {
         }
     }
 
-    override fun solve(args: List<String>) {
-        Input.from(args, "input02.txt").use { reader ->
-            reader.useLines { sequence ->
-                val sum = sequence
-                    .map { line ->
-                        val op = playerPicks[line.substring(0, 1)]!!
-                        val mp = needed(op, line.substring(2, 3))!!
-                        score(op, mp)
-                    }
-                    .sum()
-                println("sum: ${sum}")
+    override fun process(lines: Sequence<String>) {
+        val sum = lines
+            .map { line ->
+                val op = playerPicks[line.substring(0, 1)]!!
+                val mp = needed(op, line.substring(2, 3))!!
+                score(op, mp)
             }
-        }
+            .sum()
+        println("sum: ${sum}")
     }
 
     enum class Pick(val score: Int) {
