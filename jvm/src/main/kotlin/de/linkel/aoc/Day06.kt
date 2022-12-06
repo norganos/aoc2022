@@ -11,13 +11,13 @@ class Day06: AdventDay {
 
     override fun solve(args: List<String>) {
         Input.from(args, "input06.txt").use { reader ->
-            val buffer = CharBuffer(4)
+            val buffer = CharBuffer(14)
             val found = reader.charSequence().indexOfFirst { char ->
                 buffer.append(char)
-                buffer.full && buffer.content.distinct().size == 4
+                buffer.full && buffer.content.distinct().size == 14
             }
 
-            println("init marker after ${found+1} characters")
+            println("start-of-message marker after ${found+1} characters")
         }
     }
 
