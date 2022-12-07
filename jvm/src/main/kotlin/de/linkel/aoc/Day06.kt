@@ -2,24 +2,27 @@ package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractFileAdventDay
 import de.linkel.aoc.utils.ReaderSequence
+import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
 import java.io.BufferedReader
 import java.io.Reader
 
 @Singleton
-class Day06: AbstractFileAdventDay() {
+class Day06(
+    @Suppress("MnInjectionPoints") @Value("14") val minLength: Int = 14
+): AbstractFileAdventDay<Day06.Result>() {
+
     override val day = 6
 
-    override fun process(reader: BufferedReader) {
-        val buffer = CharBuffer(14)
+    override fun process(reader: BufferedReader): Result {
+        val buffer = CharBuffer(minLength)
         val found = reader.charSequence().indexOfFirst { char ->
             buffer.append(char)
-            buffer.full && buffer.content.distinct().size == 14
+            buffer.full && buffer.content.distinct().size == minLength
         }
 
-        println("start-of-message marker after ${found+1} characters")
+        return Result(found+1)
     }
-
 
     class CharBuffer(
         val size: Int,
@@ -52,4 +55,12 @@ class Day06: AbstractFileAdventDay() {
     }
 
     private fun Reader.charSequence(): ReaderSequence = ReaderSequence(this)
+
+    data class Result(
+        val length: Int
+    ) {
+        override fun toString(): String {
+            return "marker after $length chars"
+        }
+    }
 }

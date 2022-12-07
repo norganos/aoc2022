@@ -1,14 +1,17 @@
 package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractFileAdventDay
+import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
 import java.io.BufferedReader
 
 @Singleton
-class Day05: AbstractFileAdventDay() {
+class Day05(
+    @Suppress("MnInjectionPoints") @Value("CrateMover9001") val crane: Crane = Crane.CrateMover9001
+): AbstractFileAdventDay<Day05.Result>() {
     override val day = 5
 
-    private fun loadStacks(reader: BufferedReader): Map<String, Stack> {
+    fun loadStacks(reader: BufferedReader): Map<String, Stack> {
         val stacks = mutableListOf<TmpStack>()
         while (true) {
             val line = reader.readLine()
@@ -16,7 +19,7 @@ class Day05: AbstractFileAdventDay() {
                 break
             val count = (line.length + 1) / 4
             while (stacks.size < count) {
-                stacks.add(TmpStack())
+                stacks.add(TmpStack(crane))
             }
             stacks.forEachIndexed { i, p ->
                 val token = line.substring(4 * i, 4 * i + 2)
@@ -32,7 +35,7 @@ class Day05: AbstractFileAdventDay() {
         return stacks.associate { it.name to it.stack }
     }
 
-    override fun process(reader: BufferedReader) {
+    override fun process(reader: BufferedReader): Result {
         val stacks = loadStacks(reader)
         reader.useLines { sequence ->
             sequence.forEach { line ->
@@ -44,38 +47,49 @@ class Day05: AbstractFileAdventDay() {
                 stacks[tokens[3]]!!.move(to = stacks[tokens[5]]!!, count = tokens[1].toInt())
             }
             val tops = stacks.keys.sorted().map { stacks[it]!!.top  }.joinToString("")
-            println("tops: $tops")
+            return Result(tops)
         }
     }
 
-    class Stack {
+    enum class Crane {
+        CrateMover9000,
+        CrateMover9001
+    }
+
+    class Stack(
+        val crane: Crane
+    ) {
         private val content = mutableListOf<Char>()
 
         val top get(): Char = content.first()
+        val stack get(): String = content.joinToString("")
 
         fun deserialize(c: Char) {
             content.add(c)
         }
 
         fun move(to: Stack, count: Int = 1) {
-            // for CrateMover 9000
-//            repeat(count) {
-//                val box = content.removeAt(0)
-//                to.put(box)
-//            }
-            // for CrateMover 9001
-            val tmp = mutableListOf<Char>()
-            repeat(count) {
-                tmp.add(content.removeAt(0))
+            when (crane) {
+                Crane.CrateMover9000 -> {
+                    repeat(count) {
+                        val box = content.removeAt(0)
+                        to.put(box)
+                    }
+                }
+                Crane.CrateMover9001 -> {
+                    val tmp = mutableListOf<Char>()
+                    repeat(count) {
+                        tmp.add(content.removeAt(0))
+                    }
+                    to.put(tmp)
+                }
             }
-            to.put(tmp)
         }
 
-        @Suppress("unused")
-        fun put(box: Char) {
+        private fun put(box: Char) {
             content.add(0, box)
         }
-        fun put(boxes: List<Char>) {
+        private fun put(boxes: List<Char>) {
             boxes.reversed().forEach { box ->
                 content.add(0, box)
             }
@@ -83,7 +97,16 @@ class Day05: AbstractFileAdventDay() {
     }
 
     class TmpStack(
+        crane: Crane,
         var name: String = "?",
-        val stack: Stack = Stack()
+        val stack: Stack = Stack(crane)
     )
+
+    data class Result(
+        val tops: String
+    ) {
+        override fun toString(): String {
+            return "tops: $tops"
+        }
+    }
 }

@@ -29,6 +29,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
 }
 
 application {

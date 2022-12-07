@@ -5,7 +5,7 @@ import jakarta.inject.Singleton
 
 
 @Singleton
-class Day02: AbstractLinesAdventDay() {
+class Day02: AbstractLinesAdventDay<Day02.Result>() {
     override val day = 2
 
     val defeats = mapOf(
@@ -22,7 +22,10 @@ class Day02: AbstractLinesAdventDay() {
     val playerPicks = mapOf(
         "A" to PlayerPick(Player.OPPONENT, Pick.ROCK, "A"),
         "B" to PlayerPick(Player.OPPONENT, Pick.PAPER, "B"),
-        "C" to PlayerPick(Player.OPPONENT, Pick.SCISSORS, "C")
+        "C" to PlayerPick(Player.OPPONENT, Pick.SCISSORS, "C"),
+        "X" to PlayerPick(Player.MYSELF, Pick.ROCK, "X"),
+        "Y" to PlayerPick(Player.MYSELF, Pick.PAPER, "Y"),
+        "Z" to PlayerPick(Player.MYSELF, Pick.SCISSORS, "Z")
     )
 
     fun score(op: PlayerPick, mp: PlayerPick): Int {
@@ -47,15 +50,15 @@ class Day02: AbstractLinesAdventDay() {
         }
     }
 
-    override fun process(lines: Sequence<String>) {
-        val sum = lines
+    override fun process(lines: Sequence<String>): Result {
+        val games = lines
             .map { line ->
                 val op = playerPicks[line.substring(0, 1)]!!
-                val mp = needed(op, line.substring(2, 3))!!
-                score(op, mp)
-            }
-            .sum()
-        println("sum: ${sum}")
+                val mp1 = playerPicks[line.substring(2, 3)]!!
+                val mp2 = needed(op, line.substring(2, 3))!!
+                Pair(score(op, mp1), score(op, mp2))
+            }.toList()
+        return Result(games.sumOf { it.first }, games.sumOf { it.second })
     }
 
     enum class Pick(val score: Int) {
@@ -73,4 +76,13 @@ class Day02: AbstractLinesAdventDay() {
         val pick: Pick,
         val code: String? = null
     )
+
+    data class Result(
+        val part1: Int,
+        val part2: Int
+    ) {
+        override fun toString(): String {
+            return "part1: $part1, part2: $part2"
+        }
+    }
 }

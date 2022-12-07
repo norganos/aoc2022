@@ -5,12 +5,12 @@ import de.linkel.aoc.utils.TopList
 import jakarta.inject.Singleton
 
 @Singleton
-class Day01: AbstractLinesAdventDay() {
+class Day01: AbstractLinesAdventDay<Day01.Result>() {
     override val day = 1
 
     val topCount = 3
 
-    override fun process(lines: Sequence<String>) {
+    override fun process(lines: Sequence<String>): Result {
         val top = lines
             .fold(Pair(0, TopList<Int>(topCount))) { state, line ->
                 if (line.isEmpty()) {
@@ -27,7 +27,15 @@ class Day01: AbstractLinesAdventDay() {
             .let { state ->
                 state.second + state.first
             }
-        println("max: ${top.first()}")
-        println("top3: ${top.sum()}")
+        return Result(top.first(), top.sum())
+    }
+
+    data class Result(
+        val max: Int,
+        val top3: Int
+    ) {
+        override fun toString(): String {
+            return "max: $max, top3: $top3"
+        }
     }
 }

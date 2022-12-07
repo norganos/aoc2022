@@ -1,6 +1,7 @@
 package de.linkel.aoc.utils
 
 import java.io.Reader
+import java.util.NoSuchElementException
 
 class ReaderSequence(
     private val reader: Reader,
@@ -20,17 +21,24 @@ class ReaderSequence(
         if (offset < size) {
             return true
         }
-        return reader.ready()
+        loadIfNecessary()
+        return size > -1
+    }
+
+    private fun loadIfNecessary() {
+        if (offset == size) {
+            offset = 0
+            size = reader.read(buffer, offset, bufferSize)
+        }
     }
 
     override fun next(): Char {
+        loadIfNecessary()
         if (offset < size) {
             val result = buffer[offset]
             offset++
             return result
         }
-        offset = 0
-        size = reader.read(buffer, offset, bufferSize)
-        return next()
+        throw NoSuchElementException()
     }
 }

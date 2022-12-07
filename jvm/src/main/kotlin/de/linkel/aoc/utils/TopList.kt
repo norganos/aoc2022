@@ -42,7 +42,7 @@ class TopList<T>(
     operator fun plus(other: Collection<T>): TopList<T> {
         return TopList(
             capacity = capacity,
-            initial = store + other.filter { it > store.last() }
+            initial = store + other.filter { store.isEmpty() || it > store.last() }
         )
     }
 

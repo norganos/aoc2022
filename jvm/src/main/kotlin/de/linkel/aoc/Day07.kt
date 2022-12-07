@@ -2,16 +2,17 @@ package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractLinesAdventDay
 import jakarta.inject.Singleton
+import java.text.DecimalFormat
 
 @Singleton
-class Day07: AbstractLinesAdventDay() {
+class Day07: AbstractLinesAdventDay<Day07.Result>() {
     override val day = 7
 
-    val root = Dir(null, "")
+    private final val root = Dir(null, "")
     var cwd = root
     var lastcmd = ""
 
-    override fun process(lines: Sequence<String>) {
+    override fun process(lines: Sequence<String>): Result {
         val iterator = lines.iterator()
         while (iterator.hasNext()) {
             val line = iterator.next()
@@ -19,18 +20,14 @@ class Day07: AbstractLinesAdventDay() {
                 val subdir = line.substring(5)
                 if (subdir == "/") {
                     cwd = root
-                    println("cd / => $cwd")
                 } else if (subdir == "..") {
                     cwd = cwd.parent!!
-                    println("cd .. => $cwd")
                 } else {
                     cwd = cwd.get(subdir)!! as Dir
-                    println("cd $subdir => $cwd")
                 }
                 lastcmd = line
             } else if (line == "$ ls") {
                 lastcmd = line
-                println("ls")
             } else if (lastcmd == "$ ls") {
                 val space = line.indexOf(' ')
                 val size = line.substring(0, space)
@@ -45,14 +42,36 @@ class Day07: AbstractLinesAdventDay() {
             }
         }
 
+//        printout(root)
+
         val smallDirs = findDirsSmaller(root, 100000)
         println("${smallDirs.count()} small dirs in sum ${smallDirs.sumOf { it.size }}")
+
+//        smallDirs.forEach { file ->
+//            println("${file}  ${sizeFormat.format(file.size)}")
+//        }
+
         val diskSize = 70000000
         val maxTotalSize = diskSize - 30000000
 
         println("root is ${root.size} needing ${root.size - maxTotalSize} to reach $maxTotalSize")
         val deleteCandidate = findDirsBigger(root, root.size - maxTotalSize).minBy { it.size }
         println("deleting $deleteCandidate would free up ${deleteCandidate.size}, resulting in ${root.size - deleteCandidate.size}")
+        return Result(smallDirs.count(), smallDirs.sumOf { it.size }, deleteCandidate.toString(), deleteCandidate.size)
+    }
+
+    private val sizeFormat = DecimalFormat("#,##0")
+
+    @Suppress("unused")
+    fun printout(dir: Dir, indent: Int = 0) {
+        dir.files.sortedBy { it.name }.forEach { file ->
+            if (file is Dir) {
+                println("${" ".repeat(indent)} ${file.name}/  ${sizeFormat.format(file.size)}")
+                printout(file, indent+2)
+            } else {
+                println("${" ".repeat(indent)} ${file.name}  ${sizeFormat.format(file.size)}")
+            }
+        }
     }
 
     fun findDirsSmaller(dir: Dir, maxSize: Long): List<Dir> {
@@ -113,6 +132,17 @@ class Day07: AbstractLinesAdventDay() {
     ): FileObject {
         override fun toString(): String {
             return "${parent}$name"
+        }
+    }
+
+    data class Result(
+        val smallerCount: Int,
+        val smallerSum: Long,
+        val deletePath: String,
+        val deleteSize: Long
+    ) {
+        override fun toString(): String {
+            return "$smallerCount dirs smaller 100.000 in sum $smallerSum, deleting $deletePath frees up $deleteSize"
         }
     }
 }

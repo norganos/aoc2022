@@ -4,13 +4,13 @@ import de.linkel.aoc.base.AbstractLinesAdventDay
 import jakarta.inject.Singleton
 
 @Singleton
-class Day03: AbstractLinesAdventDay() {
+class Day03: AbstractLinesAdventDay<Day03.Result>() {
     override val day = 3
 
     fun prio(c: Char) = if (c.isLowerCase()) c - 'a' + 1 else c - 'A' + 27
 
 
-    override fun process(lines: Sequence<String>) {
+    override fun process(lines: Sequence<String>): Result {
         val sums = lines
             .chunked(3)
             .map { group ->
@@ -34,7 +34,15 @@ class Day03: AbstractLinesAdventDay() {
                     second = sumPair.second + groupValues.second.sumOf { prio(it) },
                 )
             }
-        println("double prio sum: ${sums.second}")
-        println("badge prio sum: ${sums.first}")
+        return Result(sums.second, sums.first)
+    }
+
+    data class Result(
+        val double: Int,
+        val badge: Int
+    ) {
+        override fun toString(): String {
+            return "double prio sum: $double, badge prio sum: $badge"
+        }
     }
 }
