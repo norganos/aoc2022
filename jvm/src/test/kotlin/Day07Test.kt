@@ -30,7 +30,7 @@ ${'$'} ls
     """.trimIndent()
 
     @Test
-    fun `part 1`() {
+    fun `example part 1`() {
         assertEquals(
             95437,
             Day07().test(aocExample).smallerSum
@@ -42,7 +42,7 @@ ${'$'} ls
     }
 
     @Test
-    fun `part 2`() {
+    fun `example part 2`() {
         assertEquals(
             24933642,
             Day07().test(aocExample).deleteSize
@@ -50,6 +50,22 @@ ${'$'} ls
         assertEquals(
             "/d/",
             Day07().test(aocExample).deletePath
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            1517599,
+            Day07().solve(emptyList()).smallerSum
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            2481982,
+            Day07().solve(emptyList()).deleteSize
         )
     }
 }

@@ -29,9 +29,8 @@ move 1 from 1 to 2
     }
 
     @Test
-    fun `part 1`() {
+    fun `example part 1`() {
         val d = Day05(Day05.Crane.CrateMover9000)
-//        d.crane = Day05.Crane.CrateMover9000
         assertEquals(
             "CMZ",
             d.test(aocExample).tops
@@ -39,12 +38,29 @@ move 1 from 1 to 2
     }
 
     @Test
-    fun `part 2`() {
+    fun `example part 2`() {
         val d = Day05(Day05.Crane.CrateMover9001)
-//        d.crane = Day05.Crane.CrateMover9001
         assertEquals(
             "MCD",
             d.test(aocExample).tops
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        val d = Day05(Day05.Crane.CrateMover9000)
+        assertEquals(
+            "CVCWCRTVQ",
+            d.solve(emptyList()).tops
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        val d = Day05(Day05.Crane.CrateMover9001)
+        assertEquals(
+            "CNSCZWLVT",
+            d.solve(emptyList()).tops
         )
     }
 }

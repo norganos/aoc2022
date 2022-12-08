@@ -2,6 +2,7 @@ package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractLinesAdventDay
 import jakarta.inject.Singleton
+import java.io.File
 
 @Singleton
 class Day08: AbstractLinesAdventDay<Day08.Result>() {
@@ -53,6 +54,21 @@ class Day08: AbstractLinesAdventDay<Day08.Result>() {
             .toList()
         val visibleInside = insideTrees
             .sumOf { it.visibleFromOutsideScore }
+        val allTrees = listOf(
+            List(rows) { r -> InsideTreeSpec(r, 0, grid[r][0], true, 0) },
+            List(rows) { r -> InsideTreeSpec(r, cols-1, grid[r][cols-1], true, 0) },
+            List(cols) { c -> InsideTreeSpec(0, c, grid[0][c], true, 0) },
+            List(cols) { c -> InsideTreeSpec(rows - 1, c, grid[rows-1][c], true, 0) },
+        ).flatten().distinct() + insideTrees
+        File("stefan-8-debug-sl.txt").writer().use { w ->
+            allTrees.sortedBy { it.r * 1000 + it.c }
+                .forEach { t ->
+                    w.appendLine("Point2D(x=${t.c}, y=${t.r}) -> ${t.visibleFromOutside}")
+                }
+            w.appendLine("visible: ${allTrees.count { it.visibleFromOutside }}")
+            w.appendLine("invisible: ${allTrees.count { !it.visibleFromOutside }}")
+            w.appendLine("solution: ${visibleInside + 2 * rows + 2 * cols - 4}")
+        }
         val highestScenicScore = insideTrees
             .map { it.scenicScore }
             .max()

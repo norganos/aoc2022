@@ -21,7 +21,7 @@ class Day01Test {
         """.trimIndent()
 
     @Test
-    fun `part 1`() {
+    fun `example part 1`() {
         assertEquals(
             24000,
             Day01().test(aocExample).max
@@ -29,10 +29,26 @@ class Day01Test {
     }
 
     @Test
-    fun `part 2`() {
+    fun `example part 2`() {
         assertEquals(
             45000,
             Day01().test(aocExample).top3
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            72511,
+            Day01().solve(emptyList()).max
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            212117,
+            Day01().solve(emptyList()).top3
         )
     }
 }

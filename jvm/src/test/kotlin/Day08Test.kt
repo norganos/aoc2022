@@ -12,7 +12,7 @@ class Day08Test {
         """.trimIndent()
 
     @Test
-    fun `part 1`() {
+    fun `example part 1`() {
         assertEquals(
             21,
             Day08().test(aocExample).visible
@@ -20,10 +20,26 @@ class Day08Test {
     }
 
     @Test
-    fun `part 2`() {
+    fun `example part 2`() {
         assertEquals(
             8,
             Day08().test(aocExample).highestScenicScore
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            1681,
+            Day08().solve(emptyList()).visible
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            201684,
+            Day08().solve(emptyList()).highestScenicScore
         )
     }
 }

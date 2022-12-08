@@ -9,7 +9,7 @@ import java.util.*
 @Command(name = "aoc", description = ["..."])
 class Main : Runnable {
     @Inject
-    lateinit var days: List<AdventDay>
+    lateinit var days: List<AdventDay<*>>
 
     @Parameters(index = "0", defaultValue = "0")
     var day: Int = 0
@@ -26,7 +26,8 @@ class Main : Runnable {
         }
         val adventDay = days.find{ it.day == day }
         println("solving AoC 2022 Day ${adventDay!!.day}")
-        adventDay.solve(args)
+        val solution = adventDay.solve(args)
+        println("Solution is $solution")
     }
 
     companion object {

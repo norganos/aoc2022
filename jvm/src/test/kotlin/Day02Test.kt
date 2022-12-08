@@ -10,7 +10,7 @@ C Z
         """.trimIndent()
 
     @Test
-    fun `part 1`() {
+    fun `example part 1`() {
         assertEquals(
             15,
             Day02().test(aocExample).part1
@@ -18,10 +18,26 @@ C Z
     }
 
     @Test
-    fun `part 2`() {
+    fun `example part 2`() {
         assertEquals(
             12,
             Day02().test(aocExample).part2
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            13682,
+            Day02().solve(emptyList()).part1
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            12881,
+            Day02().solve(emptyList()).part2
         )
     }
 }

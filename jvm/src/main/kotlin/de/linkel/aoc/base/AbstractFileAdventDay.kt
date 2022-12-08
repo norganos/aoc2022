@@ -5,7 +5,7 @@ import java.io.BufferedReader
 import java.io.File
 import kotlin.math.min
 
-abstract class AbstractFileAdventDay<T>: AdventDay {
+abstract class AbstractFileAdventDay<T>: AdventDay<T> {
 
     companion object {
         fun from(args: List<String>, name: String): BufferedReader {
@@ -16,10 +16,9 @@ abstract class AbstractFileAdventDay<T>: AdventDay {
         }
     }
 
-    override fun solve(args: List<String>) {
-        from(args, String.format("input%02d.txt", day)).use { reader ->
-            val solution = process(reader)
-            println("Solution is $solution")
+    override fun solve(args: List<String>): T {
+        return from(args, String.format("input%02d.txt", day)).use { reader ->
+            process(reader)
         }
     }
 

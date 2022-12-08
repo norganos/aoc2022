@@ -7,35 +7,35 @@ class Day06Test {
     val part2er = Day06(14)
     
     @Test
-    fun `part 1 mjqjpqmgbljsphdztnvjfqwrcgsmlb`() {
+    fun `example part 1 mjqjpqmgbljsphdztnvjfqwrcgsmlb`() {
         assertEquals(
             7,
             part1er.test("mjqjpqmgbljsphdztnvjfqwrcgsmlb").length
         )
     }
     @Test
-    fun `part 1 bvwbjplbgvbhsrlpgdmjqwftvncz`() {
+    fun `example part 1 bvwbjplbgvbhsrlpgdmjqwftvncz`() {
         assertEquals(
             5,
             part1er.test("bvwbjplbgvbhsrlpgdmjqwftvncz").length
         )
     }
     @Test
-    fun `part 1 nppdvjthqldpwncqszvftbrmjlhg`() {
+    fun `example part 1 nppdvjthqldpwncqszvftbrmjlhg`() {
         assertEquals(
             6,
             part1er.test("nppdvjthqldpwncqszvftbrmjlhg").length
         )
     }
     @Test
-    fun `part 1 nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg`() {
+    fun `example part 1 nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg`() {
         assertEquals(
             10,
             part1er.test("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg").length
         )
     }
     @Test
-    fun `part 1 zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw`() {
+    fun `example part 1 zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw`() {
         assertEquals(
             11,
             part1er.test("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw").length
@@ -44,7 +44,7 @@ class Day06Test {
 
 
     @Test
-    fun `part 2 mjqjpqmgbljsphdztnvjfqwrcgsmlb`() {
+    fun `example part 2 mjqjpqmgbljsphdztnvjfqwrcgsmlb`() {
         assertEquals(
             19,
             part2er.test("mjqjpqmgbljsphdztnvjfqwrcgsmlb").length
@@ -52,7 +52,7 @@ class Day06Test {
     }
 
     @Test
-    fun `part 2 bvwbjplbgvbhsrlpgdmjqwftvncz`() {
+    fun `example part 2 bvwbjplbgvbhsrlpgdmjqwftvncz`() {
         assertEquals(
             23,
             part2er.test("bvwbjplbgvbhsrlpgdmjqwftvncz").length
@@ -60,7 +60,7 @@ class Day06Test {
     }
 
     @Test
-    fun `part 2 nppdvjthqldpwncqszvftbrmjlhg`() {
+    fun `example part 2 nppdvjthqldpwncqszvftbrmjlhg`() {
         assertEquals(
             23,
             part2er.test("nppdvjthqldpwncqszvftbrmjlhg").length
@@ -68,7 +68,7 @@ class Day06Test {
     }
 
     @Test
-    fun `part 2 nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg`() {
+    fun `example part 2 nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg`() {
         assertEquals(
             29,
             part2er.test("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg").length
@@ -76,10 +76,26 @@ class Day06Test {
     }
 
     @Test
-    fun `part 2 zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw`() {
+    fun `example part 2 zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw`() {
         assertEquals(
             26,
             part2er.test("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw").length
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            1658,
+            part1er.solve(emptyList()).length
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            2260,
+            part2er.solve(emptyList()).length
         )
     }
 }

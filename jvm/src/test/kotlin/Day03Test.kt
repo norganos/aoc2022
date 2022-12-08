@@ -13,7 +13,7 @@ CrZsJsPPZsGzwwsLwLmpwMDw
         """.trimIndent()
 
     @Test
-    fun `part 1`() {
+    fun `example part 1`() {
         assertEquals(
             157,
             Day03().test(aocExample).double
@@ -21,10 +21,26 @@ CrZsJsPPZsGzwwsLwLmpwMDw
     }
 
     @Test
-    fun `part 2`() {
+    fun `example part 2`() {
         assertEquals(
             70,
             Day03().test(aocExample).badge
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            7889,
+            Day03().solve(emptyList()).double
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            2825,
+            Day03().solve(emptyList()).badge
         )
     }
 }

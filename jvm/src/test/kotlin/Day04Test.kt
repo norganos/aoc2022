@@ -13,7 +13,7 @@ class Day04Test {
         """.trimIndent()
 
     @Test
-    fun `part 1`() {
+    fun `example part 1`() {
         assertEquals(
             2,
             Day04().test(aocExample).contained
@@ -21,10 +21,26 @@ class Day04Test {
     }
 
     @Test
-    fun `part 2`() {
+    fun `example part 2`() {
         assertEquals(
             4,
             Day04().test(aocExample).overlapping
+        )
+    }
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            556,
+            Day04().solve(emptyList()).contained
+        )
+    }
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            876,
+            Day04().solve(emptyList()).overlapping
         )
     }
 }
