@@ -21,5 +21,9 @@ class Day08Test {
 
     @Test
     fun `part 2`() {
+        assertEquals(
+            8,
+            Day08().test(aocExample).highestScenicScore
+        )
     }
 }
