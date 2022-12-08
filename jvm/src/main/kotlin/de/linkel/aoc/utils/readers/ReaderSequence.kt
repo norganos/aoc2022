@@ -1,4 +1,4 @@
-package de.linkel.aoc.utils
+package de.linkel.aoc.utils.readers
 
 import java.io.Reader
 import java.util.NoSuchElementException

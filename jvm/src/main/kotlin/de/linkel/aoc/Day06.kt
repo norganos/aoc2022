@@ -1,7 +1,7 @@
 package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractFileAdventDay
-import de.linkel.aoc.utils.ReaderSequence
+import de.linkel.aoc.utils.readers.ReaderSequence
 import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
 import java.io.BufferedReader
