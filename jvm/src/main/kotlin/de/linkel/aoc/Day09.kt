@@ -5,7 +5,7 @@ import de.linkel.aoc.utils.grid.Point
 import de.linkel.aoc.utils.grid.Vector
 import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
-import kotlin.math.abs
+import kotlin.math.sign
 
 @Singleton
 class Day09(
@@ -40,8 +40,8 @@ class Day09(
                 val v = knots[i-1] - knots[i]
                 if (v.distance >= 2) {
                     knots[i] = knots[i] + Vector(
-                        deltaX = if (v.deltaX == 0) 0 else v.deltaX / abs(v.deltaX),
-                        deltaY = if (v.deltaY == 0) 0 else v.deltaY / abs(v.deltaY)
+                        deltaX = v.deltaX.sign,
+                        deltaY = v.deltaY.sign
                     )
                 }
             }
