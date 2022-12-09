@@ -1,10 +1,11 @@
 package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractLinesAdventDay
+import de.linkel.aoc.utils.grid.Point
+import de.linkel.aoc.utils.grid.Vector
 import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
 import kotlin.math.abs
-import kotlin.math.max
 
 @Singleton
 class Day09(
@@ -29,7 +30,7 @@ class Day09(
     class Rope(
         length: Int
     ) {
-        private var knots: Array<Point> = List(length + 1) { _ -> Point(0, 0)}.toTypedArray()
+        private var knots: Array<Point> = List(length + 1) { _ -> Point(0, 0) }.toTypedArray()
         val tailPoints = mutableSetOf(Point(0, 0))
 
         fun moveHead(direction: Direction) {
@@ -46,31 +47,6 @@ class Day09(
             }
             tailPoints.add(knots.last())
         }
-    }
-
-    data class Point(
-        val x: Int,
-        val y: Int
-    ) {
-        operator fun plus(v: Vector): Point {
-            return copy(
-                x = x + v.deltaX,
-                y = y + v.deltaY
-            )
-        }
-        operator fun minus(p: Point): Vector {
-            return Vector(
-                deltaX = x - p.x,
-                deltaY = y - p.y
-            )
-        }
-    }
-
-    data class Vector(
-        val deltaX: Int,
-        val deltaY: Int
-    ) {
-        val distance get(): Int = max(abs(deltaX), abs(deltaY))
     }
 
     enum class Direction(val vector: Vector) {
