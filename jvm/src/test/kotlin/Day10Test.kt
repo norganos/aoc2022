@@ -160,27 +160,45 @@ noop
         )
     }
 
-//    @Test
-//    fun `bigger example part 2`() {
-//        assertEquals(
-//            36,
-//            Day10().test(aocExample2).tailTrailLength
-//        )
-//    }
+val screenExample = """
+##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######.....
+""".trimIndent()
 
-//    @Test
-//    fun `solution part 1`() {
-//        assertEquals(
-//            6337,
-//            Day10(1).solve(emptyList()).sum40
-//        )
-//    }
+    @Test
+    fun `example part 2`() {
+        assertEquals(
+            screenExample.trim(),
+            Day10().test(aocExample).screen.trim()
+        )
+    }
 
-//    @Test
-//    fun `solution part 2`() {
-//        assertEquals(
-//            2455,
-//            Day10().solve(emptyList()).tailTrailLength
-//        )
-//    }
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            14860,
+            Day10(1).solve(emptyList()).sum40
+        )
+    }
+
+    val solutionPart2 = """
+###...##..####.####.#..#.#..#.###..#..#.
+#..#.#..#....#.#....#..#.#..#.#..#.#.#..
+#..#.#......#..###..####.#..#.#..#.##...
+###..#.##..#...#....#..#.#..#.###..#.#..
+#.#..#..#.#....#....#..#.#..#.#.#..#.#..
+#..#..###.####.####.#..#..##..#..#.#..#.
+    """.trimIndent()
+
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            solutionPart2.trim(),
+            Day10().solve(emptyList()).screen.trim()
+        )
+    }
 }

@@ -29,17 +29,46 @@ class Day10(
                 x40.add(pc.registers.x * pc.cycles)
             }
         }
-        return Result(x40.sum())
+        return Result(x40.sum(), pc.screen.toString())
     }
-// pixel = X+3
+
+    class Screen {
+        val output = StringBuilder()
+        private var pos = 1
+        fun tick(computer: Computer) {
+
+            if (pos >= computer.registers.x  && pos <= computer.registers.x + 2) {
+                output.append("#")
+            } else {
+                output.append(".")
+            }
+            pos++
+            if (pos == 41) {
+                output.append("\n")
+                pos = 1
+            }
+        }
+        fun clear() {
+            output.clear()
+        }
+        fun stop() {
+            output.append("\n")
+        }
+        override fun toString(): String {
+            return output.toString()
+        }
+    }
+
     interface Instruction {
         fun tick(registers: Registers): Boolean
     }
 
     class Computer(
         val instructions: Iterator<String>,
-        val instructionFactory: (instr: String) -> Instruction
+        val instructionFactory: (instr: String) -> Instruction,
     ) {
+        private val stop = Noop()
+        val screen = Screen()
         var currentCommand: Instruction = Noop()
             private set
         var cycles = 0
@@ -48,14 +77,22 @@ class Day10(
 
         fun tick(): Boolean {
             cycles++
-            if (currentCommand.tick(registers)) {
-                if (instructions.hasNext()) {
-                    currentCommand = instructionFactory(instructions.next())
-                    return false
+            val done = currentCommand.tick(registers)
+            if (done) {
+                currentCommand = if (instructions.hasNext()) {
+                    instructionFactory(instructions.next())
+                } else {
+                    stop
                 }
-                return true
             }
-            return false
+            if (currentCommand === stop) {
+                screen.stop()
+            } else if (cycles > 0) {
+                screen.tick(this)
+            } else if (cycles == 0) {
+                screen.clear()
+            }
+            return done && currentCommand === stop
         }
     }
 
@@ -90,10 +127,11 @@ class Day10(
     }
 
     data class Result(
-        val sum40: Int
+        val sum40: Int,
+        val screen: String
     ) {
         override fun toString(): String {
-            return "Sum of Signal Strengts every 40 cycles: $sum40"
+            return "Sum of Signal Strengts every 40 cycles: $sum40\n$screen"
         }
     }
 }
