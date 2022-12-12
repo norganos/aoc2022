@@ -35,11 +35,11 @@ abdefghi
         )
     }
 
-//    @Test
-//    fun `solution part 2`() {
-//        assertEquals(
-//            7,
-//            Day12().solve(emptyList()).inspectionsProduct
-//        )
-//    }
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            402,
+            Day12().solve(emptyList()).shortestDecline
+        )
+    }
 }

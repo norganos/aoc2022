@@ -165,4 +165,70 @@ class Grid<T: Any>(
     fun isEmpty(): Boolean {
         return store.isEmpty()
     }
+
+    private val directions4 = listOf(
+        Vector(1, 0),
+        Vector(0, 1),
+        Vector(-1, 0),
+        Vector(0, -1)
+    )
+    private val directions8 = listOf(
+        Vector(1, 0),
+        Vector(1, 1),
+        Vector(0, 1),
+        Vector(-1, 1),
+        Vector(-1, 0),
+        Vector(-1, -1),
+        Vector(0, -1),
+        Vector(1, -1)
+    )
+
+    fun getNeighbours(point: Point, diagonal: Boolean = false): List<DataPoint<T>> {
+        return (if (diagonal) directions8 else directions4)
+            .map { point + it }
+            .filter { store.containsKey(it) }
+            .map { DataPoint(it, store[it]!!)}
+    }
+
+    fun dijkstra(start: Point, isDest: (point: DataPoint<T>) -> Boolean, getNeighbours: (from: DataPoint<T>) -> Collection<Point>): List<DataPoint<T>>? {
+        val max = this.maxSize + 1
+        val weightMap = transform { p, d -> DijkstraNode(d, if (p == start) 0 else max, null) }
+        val points = weightMap.getAllData().map { it.point }.toMutableSet()
+        var dest: Point? = null
+        while (points.isNotEmpty()) {
+            val point = points.minBy {  weightMap[it]!!.distance }
+            val pointWeightData = weightMap[point]!!
+            val dataPoint = DataPoint(point, pointWeightData.data)
+            points.remove(point)
+            getNeighbours(dataPoint)
+                .filter { it in weightMap }
+                .filter { it in points }
+                .forEach {
+                    weightMap[it] = weightMap[it]!!.copy(distance = pointWeightData.distance + 1, before = point)
+                }
+            if (isDest(dataPoint)) {
+                dest = point
+                break
+            }
+        }
+        return if (dest != null) {
+            var prev: Point? = dest
+            val result = mutableListOf<DataPoint<T>>()
+            while (prev != null) {
+                val prevWeightData = weightMap[prev]!!
+                result.add(0, DataPoint(prev, prevWeightData.data))
+                prev = prevWeightData.before
+            }
+            result.toList()
+        } else {
+            null
+        }
+    }
+
+    data class DijkstraNode<T>(
+        val data: T,
+        val distance: Int,
+        val before: Point?
+    )
+
 }
