@@ -7,6 +7,7 @@ data class Vector(
     val deltaX: Int,
     val deltaY: Int
 ) {
+    val length: Int = deltaX + deltaY
     val distance get(): Int = max(abs(deltaX), abs(deltaY))
 
     override fun toString(): String {
