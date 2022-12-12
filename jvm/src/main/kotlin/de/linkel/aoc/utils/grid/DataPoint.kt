@@ -5,6 +5,6 @@ data class DataPoint<T>(
     val data: T
 ) {
     override fun toString(): String {
-        return "$point -> ${data}"
+        return "$point -> $data"
     }
 }

@@ -5,6 +5,7 @@ open class DefaultCommandContext: CommandContext {
     override fun getEnv(name: String): String {
         return envs[name] ?: ""
     }
+    @Suppress("unused")
     fun setEnv(name: String, value: String) {
         envs[name] = value
     }

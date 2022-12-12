@@ -156,6 +156,7 @@ class Grid<T: Any>(
             }
     }
 
+    @Suppress("unused")
     fun isNotEmpty(): Boolean {
         return store.isNotEmpty()
     }

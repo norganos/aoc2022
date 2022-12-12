@@ -11,7 +11,7 @@ import java.text.DecimalFormat
 class Day07b: AbstractFileAdventDay<Day07b.Result>() {
     override val day = 7
 
-    class FileSystemContext() {
+    class FileSystemContext {
         val root = Dir(null, "")
         var cwd = root
     }

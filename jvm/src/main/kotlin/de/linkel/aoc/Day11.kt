@@ -3,8 +3,6 @@ package de.linkel.aoc
 import de.linkel.aoc.base.AbstractLinesAdventDay
 import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
-import java.lang.Exception
-import java.lang.IllegalArgumentException
 import java.math.BigInteger
 
 @Singleton
@@ -14,14 +12,13 @@ class Day11(
 ): AbstractLinesAdventDay<Day11.Result>() {
     override val day = 11
 
-    var relieveOp: Op = if (part == 2) Identity() else Divide(3)
+    var relieveOp: Op = Identity()
 
     override fun process(lines: Sequence<String>): Result {
         val monkeys = parseMonkeys(lines)
         val sortedMonkeyIds = monkeys.keys.sorted()
-//        printout(monkeys)
 
-        relieveOp = if (part == 2) Mod(monkeys.values.map { it.test.modFactor }.fold(1, { p, f -> p * f })) else Divide(3)
+        relieveOp = if (part == 2) Mod(monkeys.values.map { it.test.modFactor }.fold(1) { p, f -> p * f }) else Divide(3)
 
         monkeys.values.forEach { m ->
             m.items.replaceAll { item -> item.copy(relieveOp = relieveOp) }
@@ -29,10 +26,8 @@ class Day11(
 
         repeat(rounds) { round ->
             sortedMonkeyIds.forEach { id ->
-//                println(" Monkey $id")
                 monkeys[id]!!.turn(monkeys)
             }
-//            printout(monkeys)
         }
         monkeys.values
             .sortedBy { it.id }
@@ -45,12 +40,6 @@ class Day11(
         return Result(
             inspections
         )
-    }
-
-    private fun printout(monkeys: Map<Int, Monkey>) {
-        monkeys.entries.sortedBy { it.key }.map { it.value }.forEach { monkey ->
-            println("$monkey")
-        }
     }
 
     private fun parseMonkeys(lines: Sequence<String>): Map<Int, Monkey> {

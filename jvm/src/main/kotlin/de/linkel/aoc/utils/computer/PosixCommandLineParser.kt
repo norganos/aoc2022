@@ -4,7 +4,7 @@ import java.lang.IllegalStateException
 import java.nio.CharBuffer
 
 class PosixCommandLineParser(
-    val commandContext: CommandContext = DefaultCommandContext()
+    @Suppress("unused") val commandContext: CommandContext = DefaultCommandContext()
 ): CommandLineParser {
     fun replaceVariables(token: String): String {
         //TODO: env vars ersetzen
