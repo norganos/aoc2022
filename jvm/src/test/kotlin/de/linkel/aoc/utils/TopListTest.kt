@@ -1,6 +1,5 @@
-package utils
+package de.linkel.aoc.utils
 
-import de.linkel.aoc.utils.TopList
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals

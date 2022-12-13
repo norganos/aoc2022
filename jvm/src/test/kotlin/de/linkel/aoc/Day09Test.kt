@@ -1,4 +1,5 @@
-import de.linkel.aoc.Day09
+package de.linkel.aoc
+
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

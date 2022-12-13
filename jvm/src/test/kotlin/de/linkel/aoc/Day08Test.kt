@@ -1,46 +1,46 @@
-import de.linkel.aoc.Day04
+package de.linkel.aoc
+
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class Day04Test {
+class Day08Test {
     val aocExample = """
-2-4,6-8
-2-3,4-5
-5-7,7-9
-2-8,3-7
-6-6,4-6
-2-6,4-8
+30373
+25512
+65332
+33549
+35390
         """.trimIndent()
 
     @Test
     fun `example part 1`() {
         assertEquals(
-            2,
-            Day04().test(aocExample).contained
+            21,
+            Day08().test(aocExample).visible
         )
     }
 
     @Test
     fun `example part 2`() {
         assertEquals(
-            4,
-            Day04().test(aocExample).overlapping
+            8,
+            Day08().test(aocExample).highestScenicScore
         )
     }
 
     @Test
     fun `solution part 1`() {
         assertEquals(
-            556,
-            Day04().solve(emptyList()).contained
+            1681,
+            Day08().solve(emptyList()).visible
         )
     }
 
     @Test
     fun `solution part 2`() {
         assertEquals(
-            876,
-            Day04().solve(emptyList()).overlapping
+            201684,
+            Day08().solve(emptyList()).highestScenicScore
         )
     }
 }

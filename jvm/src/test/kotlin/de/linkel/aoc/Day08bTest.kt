@@ -1,8 +1,9 @@
-import de.linkel.aoc.Day08
+package de.linkel.aoc
+
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class Day08Test {
+class Day08bTest {
     val aocExample = """
 30373
 25512
@@ -15,7 +16,7 @@ class Day08Test {
     fun `example part 1`() {
         assertEquals(
             21,
-            Day08().test(aocExample).visible
+            Day08b().test(aocExample).visible
         )
     }
 
@@ -23,7 +24,7 @@ class Day08Test {
     fun `example part 2`() {
         assertEquals(
             8,
-            Day08().test(aocExample).highestScenicScore
+            Day08b().test(aocExample).highestScenicScore
         )
     }
 
@@ -31,7 +32,7 @@ class Day08Test {
     fun `solution part 1`() {
         assertEquals(
             1681,
-            Day08().solve(emptyList()).visible
+            Day08b().solve(emptyList()).visible
         )
     }
 
@@ -39,7 +40,7 @@ class Day08Test {
     fun `solution part 2`() {
         assertEquals(
             201684,
-            Day08().solve(emptyList()).highestScenicScore
+            Day08b().solve(emptyList()).highestScenicScore
         )
     }
 }

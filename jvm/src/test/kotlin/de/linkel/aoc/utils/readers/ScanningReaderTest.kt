@@ -1,7 +1,5 @@
-package utils.readers
+package de.linkel.aoc.utils.readers
 
-import de.linkel.aoc.utils.readers.peeking
-import de.linkel.aoc.utils.readers.scan
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

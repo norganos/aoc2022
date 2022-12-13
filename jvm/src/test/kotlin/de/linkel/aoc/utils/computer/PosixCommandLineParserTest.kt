@@ -1,7 +1,5 @@
-package utils.computer
+package de.linkel.aoc.utils.computer
 
-import de.linkel.aoc.utils.computer.CommandLine
-import de.linkel.aoc.utils.computer.PosixCommandLineParser
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -29,7 +27,7 @@ class PosixCommandLineParserTest {
         )
     }
     @Test
-    fun `can parse simple rm -rf dir with wildcard"`() {
+    fun `can parse simple rm -rf dir with wildcard`() {
         assertEquals(
             CommandLine("rm", listOf("-rf", "/tmp/*")),
             parse("rm -rf /tmp/*")

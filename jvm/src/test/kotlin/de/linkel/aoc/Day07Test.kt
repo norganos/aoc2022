@@ -1,8 +1,9 @@
-import de.linkel.aoc.Day07b
+package de.linkel.aoc
+
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class Day07bTest {
+class Day07Test {
     val aocExample = """
 ${'$'} cd /
 ${'$'} ls
@@ -33,11 +34,11 @@ ${'$'} ls
     fun `example part 1`() {
         assertEquals(
             95437,
-            Day07b().test(aocExample).smallerSum
+            Day07().test(aocExample).smallerSum
         )
         assertEquals(
             2,
-            Day07b().test(aocExample).smallerCount
+            Day07().test(aocExample).smallerCount
         )
     }
 
@@ -45,11 +46,11 @@ ${'$'} ls
     fun `example part 2`() {
         assertEquals(
             24933642,
-            Day07b().test(aocExample).deleteSize
+            Day07().test(aocExample).deleteSize
         )
         assertEquals(
             "/d/",
-            Day07b().test(aocExample).deletePath
+            Day07().test(aocExample).deletePath
         )
     }
 
@@ -57,7 +58,7 @@ ${'$'} ls
     fun `solution part 1`() {
         assertEquals(
             1517599,
-            Day07b().solve(emptyList()).smallerSum
+            Day07().solve(emptyList()).smallerSum
         )
     }
 
@@ -65,7 +66,7 @@ ${'$'} ls
     fun `solution part 2`() {
         assertEquals(
             2481982,
-            Day07b().solve(emptyList()).deleteSize
+            Day07().solve(emptyList()).deleteSize
         )
     }
 }

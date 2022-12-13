@@ -1,6 +1,5 @@
-package utils.readers
+package de.linkel.aoc.utils.readers
 
-import de.linkel.aoc.utils.readers.ReaderSequence
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals

@@ -1,6 +1,5 @@
-package utils.readers
+package de.linkel.aoc.utils.readers
 
-import de.linkel.aoc.utils.readers.endAware
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
