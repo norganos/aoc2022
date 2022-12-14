@@ -51,6 +51,14 @@ class Grid<T: Any>(
         this.width = width
         this.height = height
     }
+    fun stretchTo(point: Point) {
+        if (point.x >= width) {
+            this.width = point.x + 1
+        }
+        if (point.y >= height) {
+            this.height = point.y + 1
+        }
+    }
 
     private fun checkPoint(point: Point) {
         if (point.x < 0 || point.y < 0 || point.x >= width || point.y >= height) {
@@ -74,6 +82,14 @@ class Grid<T: Any>(
         } else {
             store[pos] = value
         }
+    }
+
+    fun getDataBoundingBox(): Area {
+        val minX = store.keys.minOf { it.x }
+        val minY = store.keys.minOf { it.y }
+        val maxX = store.keys.maxOf { it.x }
+        val maxY = store.keys.maxOf { it.y }
+        return Area(minX, minY, maxX - minX, maxY - minY)
     }
 
     @Suppress("unused")
@@ -143,6 +159,17 @@ class Grid<T: Any>(
                     if (r != null) {
                         other.store[entry.key] = r
                     }
+                }
+                other
+            }
+    }
+
+    @Suppress("unused")
+    fun copy(): Grid<T> {
+        return Grid<T>(width, height)
+            .let { other ->
+                store.entries.forEach { entry ->
+                    other.store[entry.key] = entry.value
                 }
                 other
             }

@@ -1,5 +1,9 @@
 package de.linkel.aoc.utils.grid
 
+import java.lang.IllegalArgumentException
+import kotlin.math.abs
+import kotlin.math.sign
+
 data class Point(
     val x: Int,
     val y: Int
@@ -15,6 +19,26 @@ data class Point(
             deltaX = x - p.x,
             deltaY = y - p.y
         )
+    }
+
+    infix fun upTo(p: Point): List<Point> {
+        if (p == this) {
+            return emptyList()
+        }
+        val vector = p - this
+        return if (vector.deltaY == 0) {
+            (0 until abs(vector.deltaX))
+                .map { i -> this.copy(
+                    x = x + (i+1) * vector.deltaX.sign
+                )}
+        } else if (vector.deltaX == 0) {
+            (0 until abs(vector.deltaY))
+                .map { i -> this.copy(
+                    y = y + (i+1) * vector.deltaY.sign
+                )}
+        } else {
+            throw IllegalArgumentException("upTo only works in straight lines")
+        }
     }
 
     override fun toString(): String {

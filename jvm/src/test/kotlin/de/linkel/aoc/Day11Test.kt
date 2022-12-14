@@ -85,7 +85,7 @@ Monkey 3:
     @Test
     fun `solution part 2`() {
         assertEquals(
-            7,
+            15048718170L,
             Day11().solve(emptyList()).inspectionsProduct
         )
     }
