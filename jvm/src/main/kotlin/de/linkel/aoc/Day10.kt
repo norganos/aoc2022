@@ -33,7 +33,7 @@ class Day10(
     }
 
     class Screen {
-        val output = StringBuilder()
+        private val output = StringBuilder()
         private var pos = 1
         fun tick(computer: Computer) {
 
@@ -64,12 +64,12 @@ class Day10(
     }
 
     class Computer(
-        val instructions: Iterator<String>,
+        private val instructions: Iterator<String>,
         val instructionFactory: (instr: String) -> Instruction,
     ) {
         private val stop = Noop()
         val screen = Screen()
-        var currentCommand: Instruction = Noop()
+        private var currentCommand: Instruction = Noop()
             private set
         var cycles = 0
             private set

@@ -24,7 +24,7 @@ class Day11(
             m.items.replaceAll { item -> item.copy(relieveOp = relieveOp) }
         }
 
-        repeat(rounds) { round ->
+        repeat(rounds) {
             sortedMonkeyIds.forEach { id ->
                 monkeys[id]!!.turn(monkeys)
             }
@@ -73,7 +73,7 @@ class Day11(
     }
 
     class MonkeyBuilder(
-        val relieveOp: Op
+        private val relieveOp: Op
     ) {
         companion object {
             private var itemCount = 0

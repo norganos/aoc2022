@@ -57,7 +57,7 @@ class Day05(
     }
 
     class Stack(
-        val crane: Crane
+        private val crane: Crane
     ) {
         private val content = mutableListOf<Char>()
 

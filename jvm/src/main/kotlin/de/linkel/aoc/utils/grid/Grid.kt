@@ -29,7 +29,7 @@ class Grid<T: Any>(
         }
     }
 
-    val store = mutableMapOf<Point, T>()
+    private val store = mutableMapOf<Point, T>()
     // evtl nen performance-optimierteren zugriff? / ne liste aller belegten punkte pro row/col?
     var width = initWidth
         private set

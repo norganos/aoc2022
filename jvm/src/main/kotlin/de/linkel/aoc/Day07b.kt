@@ -45,13 +45,16 @@ class Day07b: AbstractFileAdventDay<Day07b.Result>() {
         }
 
         override fun execute(commandContext: CommandContext) {
-            val subdir = args[0]
-            if (subdir == "/") {
-                fs.cwd = fs.root
-            } else if (subdir == "..") {
-                fs.cwd = fs.cwd.parent!!
-            } else {
-                fs.cwd = fs.cwd.get(subdir)!! as Dir
+            when (val subdir = args[0]) {
+                "/" -> {
+                    fs.cwd = fs.root
+                }
+                ".." -> {
+                    fs.cwd = fs.cwd.parent!!
+                }
+                else -> {
+                    fs.cwd = fs.cwd.get(subdir)!! as Dir
+                }
             }
         }
 
@@ -104,7 +107,7 @@ class Day07b: AbstractFileAdventDay<Day07b.Result>() {
     private val sizeFormat = DecimalFormat("#,##0")
 
     @Suppress("unused")
-    fun printout(dir: Dir, indent: Int = 0) {
+    private fun printout(dir: Dir, indent: Int = 0) {
         dir.files.sortedBy { it.name }.forEach { file ->
             if (file is Dir) {
                 println("${" ".repeat(indent)} ${file.name}/  ${sizeFormat.format(file.size)}")
@@ -115,7 +118,7 @@ class Day07b: AbstractFileAdventDay<Day07b.Result>() {
         }
     }
 
-    fun findDirsSmaller(dir: Dir, maxSize: Long): List<Dir> {
+    private fun findDirsSmaller(dir: Dir, maxSize: Long): List<Dir> {
         val result = mutableListOf<Dir>()
         dir.files.forEach { file ->
             if (file is Dir) {
@@ -128,7 +131,7 @@ class Day07b: AbstractFileAdventDay<Day07b.Result>() {
         return result
     }
 
-    fun findDirsBigger(dir: Dir, minSize: Long): List<Dir> {
+    private fun findDirsBigger(dir: Dir, minSize: Long): List<Dir> {
         val result = mutableListOf<Dir>()
         dir.files.forEach { file ->
             if (file is Dir) {
@@ -158,10 +161,10 @@ class Day07b: AbstractFileAdventDay<Day07b.Result>() {
         }
 
         override fun toString(): String {
-            if (parent != null) {
-                return "${parent}$name/"
+            return if (parent != null) {
+                "${parent}$name/"
             } else {
-                return "$name/"
+                "$name/"
             }
         }
     }

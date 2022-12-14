@@ -53,9 +53,7 @@ class Day08: AbstractLinesAdventDay<Day08.Result>() {
             .toList()
         val visibleInside = insideTrees
             .sumOf { it.visibleFromOutsideScore }
-        val highestScenicScore = insideTrees
-            .map { it.scenicScore }
-            .max()
+        val highestScenicScore = insideTrees.maxOf { it.scenicScore }
         println("best score: ${insideTrees.maxBy { it.scenicScore }}")
 
         return Result(visibleInside + 2 * rows + 2 * cols - 4, highestScenicScore)

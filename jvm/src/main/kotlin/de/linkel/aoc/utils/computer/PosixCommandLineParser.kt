@@ -6,7 +6,7 @@ import java.nio.CharBuffer
 class PosixCommandLineParser(
     @Suppress("unused") val commandContext: CommandContext = DefaultCommandContext()
 ): CommandLineParser {
-    fun replaceVariables(token: String): String {
+    private fun replaceVariables(token: String): String {
         //TODO: env vars ersetzen
         return token
     }
@@ -54,25 +54,33 @@ class PosixCommandLineParser(
                     }
                 }
                 SINGLE_QUOTES -> {
-                    if (c == '\\') {
-                        state = EscapedState(state)
-                    } else if (c == '\'') {
-                        result.add(currentToken.toString()) // no env substitution
-                        currentToken.clear()
-                        state = EXPECT_WHITESPACE
-                    } else {
-                        currentToken.append(c)
+                    when (c) {
+                        '\\' -> {
+                            state = EscapedState(state)
+                        }
+                        '\'' -> {
+                            result.add(currentToken.toString()) // no env substitution
+                            currentToken.clear()
+                            state = EXPECT_WHITESPACE
+                        }
+                        else -> {
+                            currentToken.append(c)
+                        }
                     }
                 }
                 DOUBLE_QUOTES -> {
-                    if (c == '\\') {
-                        state = EscapedState(state)
-                    } else if (c == '"') {
-                        result.add(replaceVariables(currentToken.toString()))
-                        currentToken.clear()
-                        state = EXPECT_WHITESPACE
-                    } else {
-                        currentToken.append(c)
+                    when (c) {
+                        '\\' -> {
+                            state = EscapedState(state)
+                        }
+                        '"' -> {
+                            result.add(replaceVariables(currentToken.toString()))
+                            currentToken.clear()
+                            state = EXPECT_WHITESPACE
+                        }
+                        else -> {
+                            currentToken.append(c)
+                        }
                     }
                 }
                 EXPECT_WHITESPACE -> {
@@ -105,10 +113,10 @@ class PosixCommandLineParser(
             return name
         }
     }
-    val EXPECT_WHITESPACE = State("expect whitespace")
-    val WHITESPACE = State("whitespace")
-    val TEXT = State("text")
-    val SINGLE_QUOTES = State("single quotes")
-    val DOUBLE_QUOTES = State("double quotes")
+    private val EXPECT_WHITESPACE = State("expect whitespace")
+    private val WHITESPACE = State("whitespace")
+    private val TEXT = State("text")
+    private val SINGLE_QUOTES = State("single quotes")
+    private val DOUBLE_QUOTES = State("double quotes")
     data class EscapedState(val parentState: State): State("escape in ${parentState.name}")
 }

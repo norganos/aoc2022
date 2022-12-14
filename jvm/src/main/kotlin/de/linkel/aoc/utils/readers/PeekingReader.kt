@@ -17,10 +17,10 @@ class PeekingReader(
             if (buf != null) {
                 val consume = min(len, buf.size)
                 buf.copyInto(cbuf, off, 0, consume)
-                if (consume < buf.size) {
-                    buffer = buf.copyOfRange(consume, buf.size)
+                buffer = if (consume < buf.size) {
+                    buf.copyOfRange(consume, buf.size)
                 } else {
-                    buffer = null
+                    null
                 }
                 return consume
             }

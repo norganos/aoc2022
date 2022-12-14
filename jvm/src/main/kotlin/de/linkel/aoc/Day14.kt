@@ -13,7 +13,7 @@ class Day14(): AbstractLinesAdventDay<Day14.Result>() {
     val movements = listOf(
         Vector(0,1),
         Vector(-1, 1),
-        Vector(-1, 1)
+        Vector(1, 1)
     )
 
     override fun process(lines: Sequence<String>): Result {
@@ -49,7 +49,7 @@ class Day14(): AbstractLinesAdventDay<Day14.Result>() {
             }
         }
 
-        // as we reuse the map from part 1 as sand would fill up in the same way first
+        // we reuse the map from part 1 as sand would fill up in the same way first
 
         val box = map.getDataBoundingBox()
         val corridor = box.y + box.height + 1

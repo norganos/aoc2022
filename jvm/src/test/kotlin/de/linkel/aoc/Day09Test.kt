@@ -31,7 +31,7 @@ R 2
         )
     }
 
-    val aocExample2 = """
+    private val aocExample2 = """
 R 5
 U 8
 L 8

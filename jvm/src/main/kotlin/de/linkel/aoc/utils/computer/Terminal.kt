@@ -34,10 +34,7 @@ class Terminal(
                         if (cmdline.command == "exit") {
                             break
                         }
-                        val newCommand = commandFactory.create(cmdline)
-                        if (newCommand == null) {
-                            throw IllegalStateException("unknown command '${cmdline.command}'")
-                        }
+                        val newCommand = commandFactory.create(cmdline) ?: throw IllegalStateException("unknown command '${cmdline.command}'")
                         activeCommand = newCommand
                         newCommand.execute(commandContext)
                         // peek if the next token is a prompt right away and if so, close the command

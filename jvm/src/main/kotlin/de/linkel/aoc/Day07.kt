@@ -18,12 +18,18 @@ class Day07: AbstractLinesAdventDay<Day07.Result>() {
             val line = iterator.next()
             if (line.startsWith("$ cd ")) {
                 val subdir = line.substring(5)
-                if (subdir == "/") {
-                    cwd = root
-                } else if (subdir == "..") {
-                    cwd = cwd.parent!!
-                } else {
-                    cwd = cwd.get(subdir)!! as Dir
+                cwd = when (subdir) {
+                    "/" -> {
+                        root
+                    }
+
+                    ".." -> {
+                        cwd.parent!!
+                    }
+
+                    else -> {
+                        cwd.get(subdir)!! as Dir
+                    }
                 }
                 lastcmd = line
             } else if (line == "$ ls") {
@@ -117,10 +123,10 @@ class Day07: AbstractLinesAdventDay<Day07.Result>() {
         }
 
         override fun toString(): String {
-            if (parent != null) {
-                return "${parent}$name/"
+            return if (parent != null) {
+                "${parent}$name/"
             } else {
-                return "$name/"
+                "$name/"
             }
         }
     }

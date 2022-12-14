@@ -7,8 +7,7 @@ import jakarta.inject.Singleton
 class Day03: AbstractLinesAdventDay<Day03.Result>() {
     override val day = 3
 
-    fun prio(c: Char) = if (c.isLowerCase()) c - 'a' + 1 else c - 'A' + 27
-
+    private fun prio(c: Char) = if (c.isLowerCase()) c - 'a' + 1 else c - 'A' + 27
 
     override fun process(lines: Sequence<String>): Result {
         val sums = lines

@@ -2,7 +2,6 @@ package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractLinesAdventDay
 import de.linkel.aoc.utils.grid.Grid
-import de.linkel.aoc.utils.grid.Point
 
 class Day08b: AbstractLinesAdventDay<Day08b.Result>() {
     override val day = 8
@@ -10,45 +9,30 @@ class Day08b: AbstractLinesAdventDay<Day08b.Result>() {
     private fun Collection<Int>.product(): Int = this.fold(1) { p, v -> p * v }
 
     override fun process(lines: Sequence<String>): Result {
-        val treeGrid = Grid<Int>()
+        val treeGrid = Grid.parse(lines) { _, c -> c.toString().toInt() }
             .let { grid ->
-            lines
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-                .forEachIndexed { y, line ->
-                    grid.resize(grid.width, y+1)
-                    val chars = line
-                        .toCharArray()
-                    if (chars.size > grid.width) {
-                        grid.resize(chars.size, grid.height)
+                grid.transform { pos, height ->
+                    if (pos.x == 0 || pos.y == 0 || pos.x == grid.width - 1 || pos.y == grid.height - 1) {
+                        InsideTreeSpec(height, true, 0)
+                    } else {
+                        val beams = grid.getBeams(pos)
+                        InsideTreeSpec(
+                            height,
+                            beams
+                                .any { beam ->
+                                    beam.all { it.data < height }
+                                },
+                            beams
+                                .map { beam ->
+                                    beam
+                                        .indexOfFirst { it.data >= height }
+                                        .let { if (it == -1) beam.size else it + 1 }
+                                }
+                                .product()
+                        )
                     }
-                    chars
-                        .forEachIndexed { x, c ->
-                            grid[Point(x, y)] = c.toString().toInt()
-                        }
-                }
-            grid.transform { pos, height ->
-                if (pos.x == 0 || pos.y == 0 || pos.x == grid.width - 1 || pos.y == grid.height - 1) {
-                    InsideTreeSpec(height, true, 0)
-                } else {
-                    val beams = grid.getBeams(pos)
-                    InsideTreeSpec(
-                        height,
-                        beams
-                            .any { beam ->
-                                beam.all { it.data < height }
-                            },
-                        beams
-                            .map { beam ->
-                                beam
-                                    .indexOfFirst { it.data >= height }
-                                    .let { if (it == -1) beam.size else it + 1 }
-                            }
-                            .product()
-                    )
                 }
             }
-        }
 
         val visibleFromOutside = treeGrid
             .filterData { _, tree -> tree.visibleFromOutside }

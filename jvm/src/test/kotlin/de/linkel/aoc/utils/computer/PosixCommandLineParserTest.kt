@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class PosixCommandLineParserTest {
-    val parser = PosixCommandLineParser()
+    private val parser = PosixCommandLineParser()
 
-    fun parse(input: String): CommandLine {
+    private fun parse(input: String): CommandLine {
         return input.reader().use { reader ->
             parser.parse(reader)
         }
