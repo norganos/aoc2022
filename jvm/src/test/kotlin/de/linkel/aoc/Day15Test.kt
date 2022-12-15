@@ -25,17 +25,17 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3
     fun `example part 1`() {
         assertEquals(
             26,
-            Day15(10).test(aocExample).value
+            Day15(10, 20).test(aocExample).value
         )
     }
 
-//    @Test
-//    fun `example part 2`() {
-//        assertEquals(
-//            0,
-//            Day15(10).test(aocExample).value
-//        )
-//    }
+    @Test
+    fun `example part 2`() {
+        assertEquals(
+            56000011,
+            Day15(10, 20).test(aocExample).frequency
+        )
+    }
 
     @Test
     fun `solution part 1`() {
@@ -45,11 +45,11 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3
         )
     }
 
-//    @Test
-//    fun `solution part 2`() {
-//        assertEquals(
-//            0,
-//            Day15().solve(emptyList()).value
-//        )
-//    }
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            13340867187704,
+            Day15().solve(emptyList()).frequency
+        )
+    }
 }
