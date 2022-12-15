@@ -37,13 +37,13 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3
 //        )
 //    }
 
-//    @Test
-//    fun `solution part 1`() {
-//        assertEquals(
-//            0,
-//            Day15().solve(emptyList()).value
-//        )
-//    }
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            5525847,
+            Day15().solve(emptyList()).value
+        )
+    }
 
 //    @Test
 //    fun `solution part 2`() {
