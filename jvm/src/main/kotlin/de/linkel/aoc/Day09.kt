@@ -38,7 +38,7 @@ class Day09(
 
             for (i in 1 until knots.size) {
                 val v = knots[i-1] - knots[i]
-                if (v.distance >= 2) {
+                if (v.maximumAxisDistance >= 2) {
                     knots[i] = knots[i] + Vector(
                         deltaX = v.deltaX.sign,
                         deltaY = v.deltaY.sign

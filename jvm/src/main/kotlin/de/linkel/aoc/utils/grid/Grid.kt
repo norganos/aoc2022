@@ -3,8 +3,8 @@ package de.linkel.aoc.utils.grid
 import java.lang.IllegalArgumentException
 
 class Grid<T: Any>(
-    initWidth: Int = 0,
-    initHeight: Int = 0
+    origin: Point = Point(0,0),
+    dimension: Dimension = Dimension(0,0)
 ) {
     companion object {
         fun <T: Any> parse(lines: Sequence<String>, lambda: (pos: Point, c: Char) -> T): Grid<T> {
@@ -13,15 +13,12 @@ class Grid<T: Any>(
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
                 .forEachIndexed { y, line ->
-                    grid.resize(grid.width, y+1)
                     val chars = line
                         .toCharArray()
-                    if (chars.size > grid.width) {
-                        grid.resize(chars.size, grid.height)
-                    }
                     chars
                         .forEachIndexed { x, c ->
                             val p = Point(x, y)
+                            grid.stretchTo(p)
                             grid[p] = lambda(p, c)
                         }
                 }
@@ -29,45 +26,36 @@ class Grid<T: Any>(
         }
     }
 
-    private val store = mutableMapOf<Point, T>()
-    // evtl nen performance-optimierteren zugriff? / ne liste aller belegten punkte pro row/col?
-    var width = initWidth
-        private set
-    var height = initHeight
-        private set
-    val size get(): Int = store.size
-    val maxSize get(): Int = width * height
+    var area = Area(
+        x = origin.x,
+        y = origin.y,
+        width = dimension.width,
+        height = dimension.height
+    )
 
-    fun resize(width: Int, height: Int) {
-        if (this.width > width && this.height > height) {
-            val iterator = store.iterator()
-            while (iterator.hasNext()) {
-                val entry = iterator.next()
-                if (entry.key.x >= width || entry.key.y >= height) {
-                    iterator.remove()
-                }
-            }
-        }
-        this.width = width
-        this.height = height
+    // evtl nen performance-optimierteren zugriff? / ne liste aller belegten punkte pro row/col?
+    private val store = mutableMapOf<Point, T>()
+    val width get(): Int = area.width
+    val height get(): Int = area.height
+    val maxSize get(): Int = area.width * area.height
+
+    val size get(): Int = store.size
+
+    fun crop() {
+        area = getDataBoundingBox()
     }
     fun stretchTo(point: Point) {
-        if (point.x >= width) {
-            this.width = point.x + 1
-        }
-        if (point.y >= height) {
-            this.height = point.y + 1
-        }
+        area = area.extendTo(point)
     }
 
     private fun checkPoint(point: Point) {
-        if (point.x < 0 || point.y < 0 || point.x >= width || point.y >= height) {
-            throw IllegalArgumentException("coordinates $point out of bounds (${width}x$height)")
+        if (point !in area) {
+            throw IllegalArgumentException("coordinates $point out of bounds ($area)")
         }
     }
 
     operator fun contains(point: Point): Boolean {
-        return point.x >= 0 && point.y >= 0 && point.x < width && point.y < height
+        return point in area
     }
 
     operator fun get(pos: Point): T? {
@@ -94,42 +82,36 @@ class Grid<T: Any>(
 
     @Suppress("unused")
     fun getRow(y: Int): List<DataPoint<T?>> {
-        return List(width) { x ->
-            val p = Point(x, y)
+        return List(area.width) { dx ->
+            val p = Point(area.x + dx, y)
             DataPoint(p, store[p])
         }
     }
 
     fun getRowData(y: Int): List<DataPoint<T>> {
-        val result = mutableListOf<DataPoint<T>>()
-        for (x in 0 until width) {
-            val p = Point(x, y)
-            val t = store[p]
-            if (t != null) {
-                result.add(DataPoint(p, t))
+        return List(width) { dx ->
+                Point(area.x + dx, y)
             }
-        }
-        return result
+            .filter { store[it] != null }
+            .map { DataPoint(it, store[it]!!) }
+            .toList()
     }
 
     @Suppress("unused")
     fun getCol(x: Int): List<DataPoint<T?>> {
-        return List(height) { y ->
-            val p = Point(x, y)
+        return List(area.height) { dy ->
+            val p = Point(x, area.y + dy)
             DataPoint(p, store[p])
         }
     }
 
     fun getColData(x: Int): List<DataPoint<T>> {
-        val result = mutableListOf<DataPoint<T>>()
-        for (y in 0 until height) {
-            val p = Point(x, y)
-            val t = store[p]
-            if (t != null) {
-                result.add(DataPoint(p, t))
+        return List(area.height) { dy ->
+                Point(x, area.y + dy)
             }
-        }
-        return result
+            .filter { store[it] != null }
+            .map { DataPoint(it, store[it]!!) }
+            .toList()
     }
 
     fun getBeams(pos: Point): List<List<DataPoint<T>>> {
@@ -152,7 +134,7 @@ class Grid<T: Any>(
     }
 
     fun <R: Any> transform(lambda: (pos: Point, data: T) -> R?): Grid<R> {
-        return Grid<R>(width, height)
+        return Grid<R>(area.origin, area.dimension)
             .let { other ->
                 store.entries.forEach { entry ->
                     val r = lambda(entry.key, entry.value)
@@ -166,7 +148,7 @@ class Grid<T: Any>(
 
     @Suppress("unused")
     fun copy(): Grid<T> {
-        return Grid<T>(width, height)
+        return Grid<T>(area.origin, area.dimension)
             .let { other ->
                 store.entries.forEach { entry ->
                     other.store[entry.key] = entry.value
