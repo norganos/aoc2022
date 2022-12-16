@@ -49,121 +49,123 @@ class Day16(): AbstractLinesAdventDay<Day16.Result>() {
                 valveMap
             }
 
-        val bestSolutionHolder = SolutionHolder()
-        val initValveVisitLog = ValveVisitLog(
+        val log1 = ValveVisitLog(
+            1,
             30,
             valves.values.count { it.flowRate > 0 }
         )
-        dfs(valves[startValve]!!, bestSolutionHolder, initValveVisitLog)
-        assert(factorial(initValveVisitLog.valveCount.toLong()) == bestSolutionHolder.visitedPaths)
+        val start1 = System.currentTimeMillis()
+        dfs(arrayOf(valves["AA"]!!), log1)
+        println("Part 1 took ${(System.currentTimeMillis() - start1)}ms")
+        val log2 = ValveVisitLog(
+            2,
+            26,
+            valves.values.count { it.flowRate > 0 }
+        )
+        val start2 = System.currentTimeMillis()
+        dfs(arrayOf(valves["AA"]!!, valves["AA"]!!), log2)
+        println("Part 2 took ${(System.currentTimeMillis() - start2)}ms")
 
         return Result(
-            bestSolutionHolder.score,
-            bestSolutionHolder.visitedPaths,
+            log1.bestScore,
+            log2.bestScore,
         )
     }
 
-    private fun factorial(num: Long): Long {
-        var factorial: Long = 1
-        for (i in 1..num) {
-            factorial *= i
-        }
-        return factorial
-    }
-
     private fun dfs(
-        current: Valve,
-        bestSolutionHolder: SolutionHolder,
+        current: Array<Valve>,
         log: ValveVisitLog
     ) {
-        if (log.depth >= log.maxDepth || log.openValves.size == log.valveCount) {
-            bestSolutionHolder.add(log)
-//            val releases = log.visits
-//                .take(log.depth)
-//                .map { it.openingFlowRate ?: 0 }
-//                .runningFold(0) { p, e ->
-//                    p + e
-//                }
-//                .toList()
-//                .let { r ->
-//                    if (r.size < log.maxDepth) {
-//                        r + List(log.maxDepth - r.size) { _ -> r.last() }
-//                    } else {
-//                        r
-//                    }
-//                }
-//                .take(log.maxDepth)
-//            assert(log.score == releases.sum())
+        if (log.done) {
+            log.commit()
             return
         }
-        if (!log.isOpen(current) && current.flowRate > 0) {
-            log.open(current)
-            dfs(current, bestSolutionHolder, log)
-            log.leave()
-        } else {
-            val maxSize = 30 - log.depth
-            val nexts = current.paths
-                .filter { !log.isOpen(it.last()) && it.size <= maxSize && it.last().flowRate > 0 }.toList()
-            assert(nexts.size <= log.valveCount - log.openValves.size)
-            for (next in nexts) {
-                log.visit(next)
-                dfs(next.last(), bestSolutionHolder, log)
-                log.leave(next.size)
-            }
-            if (nexts.isEmpty()) {
-                val anyValve = current.next.first()
-                log.visit(anyValve)
-                dfs(anyValve, bestSolutionHolder, log)
-                log.leave()
-            }
+        val worker = log.idleWorker
+        val maxSize = log.maxDepth - log.depths[worker]
+        val nexts = current[worker].paths
+            .filter { !log.isOpen(it.last()) && it.size + 1 <= maxSize && it.last().flowRate > 0 }.toList()
+        assert(nexts.size <= log.valveCount - log.openValves.size)
+        for (next in nexts) {
+            log.visit(worker, next)
+            val nextPos = current.copyOf()
+            nextPos[worker] = next.last()
+            log.open(worker, nextPos[worker])
+            dfs(nextPos, log)
+            log.leave(worker, next.size+1)
+        }
+        if (nexts.isEmpty()) {
+            val anyValve = current[worker].next.first()
+            log.visit(worker, anyValve)
+            val nextPos = current.copyOf()
+            nextPos[worker] = anyValve
+            dfs(nextPos, log)
+            log.leave(worker)
         }
     }
 
+
     class ValveVisitLog(
+        val workers: Int,
         val maxDepth: Int,
         val valveCount: Int
     ) {
-        val visits = List(maxDepth) { _ -> ValveVisitLogEntry() }.toTypedArray()
-        var depth = 0
+        val visits = List(workers) { _ ->
+            List(maxDepth) { _ -> ValveVisitLogEntry() }.toTypedArray()
+        }.toTypedArray()
+        val depths = List(workers) { _ -> 0 }.toTypedArray()
         var score = 0
         val openValves: MutableSet<String> = mutableSetOf()
 
-        fun visit(valve: Valve) {
-            visits[depth].valve = valve.id
-            visits[depth].openingFlowRate = null
-            depth++
+        var bestSolution: List<Array<ValveVisitLogEntry>>? = null
+        var bestScore = 0
+
+        val done get(): Boolean {
+            return openValves.size == valveCount ||
+                (0 until workers)
+                .all { depths[it] >= maxDepth }
         }
-        fun visit(valves: ValvePath) {
+
+        val idleWorker get(): Int {
+            return (0 until workers)
+                .minBy { depths[it] }
+        }
+
+        fun visit(worker: Int, valve: Valve) {
+            visits[worker][depths[worker]].valve = valve.id
+            visits[worker][depths[worker]].openingFlowRate = null
+            depths[worker]++
+        }
+        fun visit(worker: Int, valves: ValvePath) {
             valves.forEach { valve ->
-                visits[depth].valve = valve.id
-                visits[depth].openingFlowRate = null
-                depth++
+                visits[worker][depths[worker]].valve = valve.id
+                visits[worker][depths[worker]].openingFlowRate = null
+                depths[worker]++
             }
         }
-        fun open(valve: Valve) {
-            val current = visits[depth-1]
+        fun open(worker: Int, valve: Valve) {
+            val current = visits[worker][depths[worker]-1]
             if (current.valve in openValves) {
                 throw IllegalStateException("${current.valve} already open")
             }
             if (current.valve != valve.id) {
                 throw IllegalStateException("${valve.id} is not current value (${current.valve})")
             }
-            visits[depth].valve = current.valve
-            visits[depth].openingFlowRate = valve.flowRate
-            depth++
-            score += (maxDepth - depth) * valve.flowRate
+            visits[worker][depths[worker]].valve = current.valve
+            visits[worker][depths[worker]].openingFlowRate = valve.flowRate
+            depths[worker]++
+            score += (maxDepth - depths[worker]) * valve.flowRate
             openValves.add(current.valve)
         }
-        fun leave(count: Int = 1) {
+        fun leave(worker: Int, count: Int = 1) {
             repeat(count) {
-                val last = visits[depth-1]
+                val last = visits[worker][depths[worker]-1]
                 if (last.openingFlowRate != null) {
                     openValves.remove(last.valve)
-                    score -= (maxDepth - depth) * last.openingFlowRate!!
+                    score -= (maxDepth - depths[worker]) * last.openingFlowRate!!
                 }
                 last.valve = "  "
                 last.openingFlowRate = null
-                depth--
+                depths[worker]--
             }
         }
         fun isOpen(valve: Valve): Boolean {
@@ -172,17 +174,36 @@ class Day16(): AbstractLinesAdventDay<Day16.Result>() {
 
         override fun toString(): String {
             val sb = StringBuilder()
-            visits.forEach { v ->
-                if (v.openingFlowRate != null) {
-                    sb.append("__")
-                } else {
-                    sb.append(v.valve)
+            (0 until maxDepth).forEach { i ->
+                (0 until workers).forEach { w ->
+                    if (w > 0) {
+                        sb.append("/")
+                    }
+                    if (visits[w][i].openingFlowRate != null) {
+                        sb.append("__")
+                    } else {
+                        sb.append(visits[w][i].valve)
+                    }
                 }
                 sb.append(" ")
             }
             sb.append("= ")
             sb.append(score.toString())
             return sb.toString()
+        }
+
+        fun commit() {
+            if ((0 until workers).any { depths[it] > maxDepth }) {
+                println("ignore solution ${toString()} because of depthts: ${depths.joinToString("/")}")
+            } else {
+                if (score > bestScore) {
+                    bestScore = score
+                    bestSolution = (0 until workers)
+                        .map { w ->
+                            visits[w].copyOfRange(0, depths[w])
+                        }
+                }
+            }
         }
     }
 
@@ -194,20 +215,6 @@ class Day16(): AbstractLinesAdventDay<Day16.Result>() {
                 return "release $openingFlowRate from $valve"
             } else {
                 return "go to $valve"
-            }
-        }
-    }
-    class SolutionHolder {
-        var solution: List<ValveVisitLogEntry>? = null
-        var score: Int = 0
-        var visitedPaths: Long = 0
-
-        fun add(s: ValveVisitLog) {
-            visitedPaths++
-            assert(s.depth <= s.maxDepth)
-            if (s.score > this.score) {
-                this.score = s.score
-                this.solution = listOf(*s.visits).subList(0, s.depth)
             }
         }
     }
@@ -224,7 +231,6 @@ class Day16(): AbstractLinesAdventDay<Day16.Result>() {
         val next = mutableSetOf<Valve>()
         var paths: List<List<Valve>> = emptyList()
     }
-
 
     private fun calculateDijkstraDistances(start: Valve): List<ValvePath> {
         val visited = mutableMapOf<String, DijkstraNode>()
@@ -261,11 +267,11 @@ class Day16(): AbstractLinesAdventDay<Day16.Result>() {
     }
 
     data class Result(
-        val sumReleasedPressure: Int,
-        val visitedPaths: Long
+        val sumReleasedPressure1: Int,
+        val sumReleasedPressure2: Int
     ) {
         override fun toString(): String {
-            return "can release $sumReleasedPressure pressure at most (tried $visitedPaths different paths)"
+            return "maximum pressure release alone: $sumReleasedPressure1, with an elephant: $sumReleasedPressure2"
         }
     }
 }

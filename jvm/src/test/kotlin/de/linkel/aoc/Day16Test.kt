@@ -21,26 +21,26 @@ Valve JJ has flow rate=21; tunnel leads to valve II
     fun `example part 1`() {
         assertEquals(
             1651,
-            Day16().test(aocExample).sumReleasedPressure
+            Day16().test(aocExample).sumReleasedPressure1
         )
     }
 
     @Test
     fun `example part 2`() {
         assertEquals(
-            2253,
-            Day16().test(aocExample).sumReleasedPressure
+            1707,
+            Day16().test(aocExample).sumReleasedPressure2
         )
     }
-//
-//    @Test
-//    fun `solution part 1`() {
-//        assertEquals(
-//            5525847,
-//            Day16().solve(emptyList()).value
-//        )
-//    }
-//
+
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            2253,
+            Day16().solve(emptyList()).sumReleasedPressure1
+        )
+    }
+
 //    @Test
 //    fun `solution part 2`() {
 //        assertEquals(
