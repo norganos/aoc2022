@@ -33,19 +33,19 @@ Valve JJ has flow rate=21; tunnel leads to valve II
         )
     }
 
-    @Test
-    fun `solution part 1`() {
-        assertEquals(
-            2253,
-            Day16().solve(emptyList()).sumReleasedPressure1
-        )
-    }
+//    @Test
+//    fun `solution part 1`() {
+//        assertEquals(
+//            2253,
+//            Day16().solve(emptyList()).sumReleasedPressure1
+//        )
+//    }
 
 //    @Test
 //    fun `solution part 2`() {
 //        assertEquals(
-//            13340867187704,
-//            Day16().solve(emptyList()).value
+//            2838,
+//            Day16().solve(emptyList()).sumReleasedPressure2
 //        )
 //    }
 }

@@ -1,5 +1,8 @@
 package de.linkel.aoc.utils.grid
 
+import kotlin.math.max
+import kotlin.math.min
+
 data class Area(
     val x: Int,
     val y: Int,
@@ -13,12 +16,18 @@ data class Area(
         return point.x >= x && point.y >= y && point.x < x + width && point.y < y + height
     }
 
-    fun extendTo(point: Point): Area = copy(
-            x = if (point.x < x) point.x else x,
-            y = if (point.y < y) point.y else y,
-            width = if (point.x >= x + width) point.x - x + 1 else width,
-            height = if (point.y >= y + height) point.y - y + 1 else height
+    fun extendTo(point: Point): Area {
+        val x = min(this.x, point.x)
+        val y = min(this.y, point.y)
+        val w = max(this.x + width, point.x + 1) - x
+        val h = max(this.y + height, point.y + 1) - y
+        return copy(
+            x = x,
+            y = y,
+            width = w,
+            height = h
         )
+    }
 
     override fun toString(): String {
         return "${width}x${height}@${x}/${y}"

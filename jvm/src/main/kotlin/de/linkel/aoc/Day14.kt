@@ -17,7 +17,7 @@ class Day14(): AbstractLinesAdventDay<Day14.Result>() {
     )
 
     override fun process(lines: Sequence<String>): Result {
-        val map = Grid<Element>(Point(1, 1))
+        val map = Grid<Element>(Point(0, 0))
         lines.forEach { line ->
             val path = line.split(" -> ")
                 .map {
