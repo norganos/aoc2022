@@ -1,24 +1,19 @@
 package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractFileAdventDay
-import de.linkel.aoc.base.AbstractLinesAdventDay
 import de.linkel.aoc.utils.grid.Point
 import de.linkel.aoc.utils.grid.Vector
 import de.linkel.aoc.utils.readers.ReaderSequence
 import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
 import java.io.BufferedReader
-import java.io.Reader
 import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
-import java.lang.StringBuilder
 import java.util.*
-import java.util.regex.Pattern
 import kotlin.math.max
 
 @Singleton
 class Day17(
-    @Suppress("MnInjectionPoints") @Value("1000000000000") val blockCount: Long = 1000000000000L
+    @Suppress("MnInjectionPoints") @Value("1000000000000") val blockCount: Long = 1000_000_000_000L
 ): AbstractFileAdventDay<Day17.Result>() {
     override val day = 17
 
@@ -38,43 +33,130 @@ class Day17(
             }
             .toList()
 
-
         val chamber = Chamber()
-        val jets = jetSequence(jetPattern).iterator()
-        var steps = 0L
-        rockSequence()
-//            .take(11)
-            .takeWhile { steps++ < blockCount }
-            .forEach { rockTemplate ->
-                var rock = rockTemplate.plus(Vector(0, chamber.minY + 4))
+        val rocksStart = rockCycle(jetPattern, chamber, blockCount)
+        val heightStart = chamber.savedHeight + chamber.minY
+        val topShapeStart = chamber.topRocks.flatMap { it.points }
+            .let { s ->
+                val toBottom = Vector(0, -s.minOf { it.y })
+                s.map { it + toBottom }
+            }
+            .toSet()
+        val rocksPerCycle = rockCycle(jetPattern, chamber, blockCount - rocksStart)
+        if (rocksPerCycle == 0L) {
+            return Result(
+                heightStart
+            )
+        }
+        val heightPerCycle = chamber.savedHeight + chamber.minY - heightStart
+        val topShapeAfterCycle = chamber.topRocks.flatMap { it.points }
+            .let { s ->
+                val toBottom = Vector(0, -s.minOf { it.y })
+                s.map { it + toBottom }
+            }
+            .toSet()
+        assert(topShapeStart == topShapeAfterCycle)
+        val cycles = (blockCount - rocksStart) / rocksPerCycle
+        val rest = blockCount - rocksStart - cycles * rocksPerCycle
+        val rocksEnd = rockCycle(jetPattern, chamber, rest)
+        assert(rocksStart + cycles * rocksPerCycle + rocksEnd == blockCount)
+        val heightEnd = chamber.savedHeight + chamber.minY - heightPerCycle - heightStart
+        return Result(
+            heightStart + cycles * heightPerCycle + heightEnd
+        )
+//        if (blockCount > 2 * jetPattern.size) {
+//            rockSequence()
+//                .takeWhile { steps++ < jetPattern.size }
+//                .forEach { rockRound(jets, chamber, it) }
+//            steps = 0L
+//            rockSequence()
+//                .takeWhile { steps++ < jetPattern.size }
+//                .forEach { rockRound(jets, chamber, it) }
+//            val heightCycle2 = chamber.savedHeight + chamber.minY - heightCycle1
+//            val rocksCycle2 = chamber.blockCount - rocksCycle1
+//            val topShapeCycle2 = chamber.topRocks.flatMap { it.points }
+//                .let { s ->
+//                    val toBottom = Vector(0, -s.minOf { it.y })
+//                    s.map { it + toBottom }
+//                }
+//                .toSet()
+//            assert(topShapeCycle1 == topShapeCycle2)
+//            steps = 0L
+//            rockSequence()
+//                .takeWhile { steps++ < (blockCount % jetPattern.size) }
+//                .forEach { rockRound(jets, chamber, it) }
+//            val heightTail = chamber.savedHeight + chamber.minY - heightCycle2 - heightCycle1
+//            val rocksTail = chamber.blockCount - rocksCycle2 - rocksCycle1
+//
+//
+//            return Result(
+//                heightCycle1 + (blockCount / rocksCycle2 - 1) * heightCycle2 + heightTail
+//            )
+//        } else {
+//            val chamber = Chamber()
+//            var steps = 0L
+//            val jets = jetSequence(jetPattern).iterator()
+//            rockSequence()
+//                .takeWhile { steps++ < blockCount }
+//                .forEach { rockRound(jets, chamber, it) }
+//            return Result(
+//                chamber.savedHeight + chamber.minY
+//            )
+//        }
+    }
+
+    fun rockRound(jets: Iterator<Vector>, chamber: Chamber, rockTemplate: Shape) {
+        var rock = rockTemplate.plus(Vector(0, chamber.minY + 4))
 //                println("\n\n\n")
 //                chamber.print(rock)
-                while (true) {
+        while (true) {
 //                    steps++
-                    var r = rock + jets.next()
-                    rock = if (r in chamber && !chamber.blocks(r)) r else rock
-                    r = rock + down
-                    if (chamber.blocks(r)) {
-                        chamber.put(rock)
-                        break
-                    } else {
-                        rock = r
-                    }
+            var r = rock + jets.next()
+            rock = if (r in chamber && !chamber.blocks(r)) r else rock
+            r = rock + down
+            if (chamber.blocks(r)) {
+                chamber.put(rock)
+                break
+            } else {
+                rock = r
+            }
+        }
+    }
+
+    fun rockCycle(jetPatterns: List<Vector>, chamber: Chamber, maxRocks: Long): Long {
+        var rocks = 0L
+        var j = 0
+        var r = 0
+        while (rocks < maxRocks) {
+            if (rocks > 0 && j == 0 && r == 0) {
+                return rocks
+            }
+            var rock = rockPatterns[r].plus(Vector(0, chamber.minY + 4))
+            r = (r + 1) % rockPatterns.size
+            while (true) {
+                var r = rock + jetPatterns[j]
+                j = (j + 1) % jetPatterns.size
+                rock = if (r in chamber && !chamber.blocks(r)) r else rock
+                r = rock + down
+                if (chamber.blocks(r)) {
+                    chamber.put(rock)
+                    break
+                } else {
+                    rock = r
                 }
             }
-//        chamber.print(null)
-//        println("used $steps steps")
-
-        return Result(
-            chamber.minY
-        )
+            rocks++
+        }
+        return rocks
     }
 
     class Chamber(
         val minX: Int = 0,
         val maxX: Int = 6
     ) {
-        var minY = 0L
+        var minY = 0
+        var savedHeight = 0L
+        var blockCount = 0L
 
         var topRocks: List<Shape> = emptyList()
 
@@ -87,8 +169,9 @@ class Day17(
         }
 
         fun put(s: Shape) {
-            val xx = mutableSetOf(0,1,2,3,4,5,6)
-            val backup = topRocks
+            blockCount++
+//            val xx = mutableSetOf(0,1,2,3,4,5,6)
+//            val backup = topRocks
             topRocks = (topRocks + s)
                 .sortedByDescending { r -> r.points.maxOf { it.y } }
                 .take(50)
@@ -98,6 +181,13 @@ class Day17(
 //                }
 //                .toList()
             minY = topRocks.maxOf { r -> r.points.maxOf { it.y } }
+            if (minY > 10_000) {
+                savedHeight += 10_000
+                val transform = Vector(0,-10_000)
+                topRocks = topRocks.map {
+                    it + transform
+                }
+            }
         }
 
         fun print(floating: Shape?) {
@@ -114,7 +204,7 @@ class Day17(
         }
     }
 
-    val shapes = listOf(
+    val rockPatterns = listOf(
         Shape(
             listOf(
                 Point(2, 0),
@@ -162,7 +252,7 @@ class Day17(
     fun rockSequence(): Sequence<Shape> {
         var pos = 0
         return generateSequence {
-            shapes[pos++ % shapes.size]
+            rockPatterns[pos++ % rockPatterns.size]
         }
     }
 
