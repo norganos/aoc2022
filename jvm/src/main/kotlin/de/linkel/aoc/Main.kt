@@ -25,9 +25,7 @@ class Main : Runnable {
             }
         }
         val adventDay = days.find{ it.day == day }
-        println("solving AoC 2022 Day ${adventDay!!.day}")
-        val solution = adventDay.solve(args)
-        println("Solution is $solution")
+        adventDay!!.solve(args)
     }
 
     companion object {
