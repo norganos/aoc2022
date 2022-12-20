@@ -7,7 +7,7 @@ import java.text.DecimalFormat
 import kotlin.math.min
 
 abstract class AbstractFileAdventDay<T>: AdventDay<T> {
-    private val msFormat = DecimalFormat("#,##")
+    private val msFormat = DecimalFormat("#,##0")
 
     companion object {
         fun from(args: List<String>, name: String): BufferedReader {

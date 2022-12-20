@@ -32,17 +32,17 @@ class Day18Test {
     fun `example part 2`() {
         assertEquals(
             58,
-            Day18().test(aocExample).surface
+            Day18().test(aocExample).exteriorSurface
         )
     }
 
-//    @Test
-//    fun `solution part 1`() {
-//        assertEquals(
-//            3173,
-//            Day18().solve(emptyList()).surface
-//        )
-//    }
+    @Test
+    fun `solution part 1`() {
+        assertEquals(
+            4348,
+            Day18().solve(emptyList()).surface
+        )
+    }
 
 //    @Test
 //    fun `solution part 2`() {
