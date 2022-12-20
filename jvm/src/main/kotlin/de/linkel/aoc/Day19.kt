@@ -1,10 +1,15 @@
 package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractLinesAdventDay
+import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
+import kotlin.math.min
 
 @Singleton
-class Day19(): AbstractLinesAdventDay<Day19.Result>() {
+class Day19(
+    @Suppress("MnInjectionPoints") @Value("32") val minutes: Int = 32,
+    @Suppress("MnInjectionPoints") @Value("3") val limitBluePrints: Int = 3,
+): AbstractLinesAdventDay<Day19.Result>() {
     override val day = 19
 
     override fun process(lines: Sequence<String>): Result {
@@ -28,12 +33,17 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
                 BluePrint(id, robots)
             }
             .toList()
+            .let {
+                if (limitBluePrints > 0)
+                    it.subList(0, min(it.size, limitBluePrints))
+                else
+                    it
+            }
 
 
 //        test(bluePrints)
 
         val startRobots = Resources(mapOf(Resource.ORE to 1))
-        val minutes = 24
         val plans = bluePrints.map { b ->
 //            val firstResourceInRound = mutableMapOf<Resource, Int>()
 //            firstResourceInRound[Resource.ORE] = 1
@@ -59,13 +69,13 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
 
 //            Pair(b.id, 24 - firstResourceInRound[Resource.GEODE]!!)
 
-            val log = Log(maxDepth = 24, blueprints = b.blueprints, robots = startRobots, latestRoundForResource = latestRoundForResource)
+            val log = Log(maxDepth = minutes, blueprints = b.blueprints, robots = startRobots, latestRoundForResource = latestRoundForResource)
             val best = SolutionHolder()
             dfs(log, best)
             Pair(b.id, best.geodes)
         }
 
-        return Result(plans.sumOf { it.first * it.second })
+        return Result(plans.sumOf { it.first * it.second }, plans.fold(1) { a, p -> a * p.second })
     }
 
 //    fun test(bluePrints: List<BluePrint>) {
@@ -137,10 +147,12 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
             for (robot in buildPossibilities) {
                 dfs(log.nextRound(robot), best)
             }
-            if (buildPossibilities.size == 1) {
-                dfs(log.nextRound(null), best, buildPossibilities.first())
-            } else {
-                dfs(log.nextRound(null), best)
+            if (Resource.GEODE !in buildPossibilities) {
+                if (buildPossibilities.size == 1) {
+                    dfs(log.nextRound(null), best, buildPossibilities.first())
+                } else {
+                    dfs(log.nextRound(null), best)
+                }
             }
         }
     }
@@ -152,9 +164,7 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
     data class BluePrint(
         val id: Int,
         val blueprints: Map<Resource, Resources>,
-    ) {
-
-    }
+    )
 
     data class Log(
         val maxDepth: Int,
@@ -279,10 +289,11 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
 //    }
 
     data class Result(
-        val qualityLevels: Int
+        val qualityLevels: Int,
+        val product: Int
     ) {
         override fun toString(): String {
-            return "sum of quality levels: $qualityLevels"
+            return "sum of quality levels: $qualityLevels, product: $product"
         }
     }
 }

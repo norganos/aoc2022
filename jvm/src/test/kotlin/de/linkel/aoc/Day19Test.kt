@@ -13,15 +13,15 @@ Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsid
     fun `example part 1`() {
         assertEquals(
             33,
-            Day19().test(aocExample).qualityLevels
+            Day19(24, -1).test(aocExample).qualityLevels
         )
     }
 
 //    @Test
 //    fun `example part 2`() {
 //        assertEquals(
-//            58,
-//            Day19().test(aocExample).exteriorSurface
+//            56*62,
+//            Day19().test(aocExample).product
 //        )
 //    }
 
@@ -29,15 +29,15 @@ Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsid
     fun `solution part 1`() {
         assertEquals(
             1681,
-            Day19().solve(emptyList()).qualityLevels
+            Day19(24, -1).solve(emptyList()).qualityLevels
         )
     }
 
 //    @Test
 //    fun `solution part 2`() {
 //        assertEquals(
-//            2838,
-//            Day19().solve(emptyList()).surface
+//            5394,
+//            Day19().solve(emptyList()).product
 //        )
 //    }
 }
