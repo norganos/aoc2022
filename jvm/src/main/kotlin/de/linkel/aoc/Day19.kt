@@ -27,32 +27,35 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
                     }
                 BluePrint(id, robots)
             }
+            .toList()
+
+
+//        test(bluePrints)
 
         val startRobots = Resources(mapOf(Resource.ORE to 1))
         val minutes = 24
-
         val plans = bluePrints.map { b ->
-            val firstResourceInRound = mutableMapOf<Resource, Int>()
-            firstResourceInRound[Resource.ORE] = 1
-            while (Resource.values().any { it !in firstResourceInRound }) {
-                Resource.values().forEach { r ->
-                    if (r !in firstResourceInRound) {
-                        if (b.blueprints[r]!!.amount.all { a -> a.key in firstResourceInRound }) {
-                            firstResourceInRound[r] = b.blueprints[r]!!.amount.entries.maxOf { d -> firstResourceInRound[d.key]!! + d.value / 4 + 1 }
-                        }
-                    }
-                }
-            }
+//            val firstResourceInRound = mutableMapOf<Resource, Int>()
+//            firstResourceInRound[Resource.ORE] = 1
+//            while (Resource.values().any { it !in firstResourceInRound }) {
+//                Resource.values().forEach { r ->
+//                    if (r !in firstResourceInRound) {
+//                        if (b.blueprints[r]!!.amount.all { a -> a.key in firstResourceInRound }) {
+//                            firstResourceInRound[r] = b.blueprints[r]!!.amount.entries.maxOf { d -> firstResourceInRound[d.key]!! + d.value / 4 + 1 }
+//                        }
+//                    }
+//                }
+//            }
             val latestRoundForResource = mutableMapOf<Resource, Int>()
             latestRoundForResource[Resource.GEODE] = minutes - 1
             latestRoundForResource[Resource.OBSIDIAN] = latestRoundForResource[Resource.GEODE]!! - getMinRoundsToEarn(b.blueprints[Resource.GEODE]!![Resource.OBSIDIAN])
             latestRoundForResource[Resource.CLAY] = latestRoundForResource[Resource.OBSIDIAN]!! - getMinRoundsToEarn(b.blueprints[Resource.OBSIDIAN]!![Resource.CLAY])
-
-            val bestAmountOfRobots = mutableMapOf<Resource, Int>()
-            bestAmountOfRobots[Resource.GEODE] = (minutes - firstResourceInRound[Resource.GEODE]!!) / b.blueprints[Resource.GEODE]!!.max
-            bestAmountOfRobots[Resource.OBSIDIAN] = (minutes - firstResourceInRound[Resource.OBSIDIAN]!!) / b.blueprints[Resource.OBSIDIAN]!!.max
-            bestAmountOfRobots[Resource.CLAY] = (minutes - firstResourceInRound[Resource.CLAY]!!) / b.blueprints[Resource.CLAY]!!.max
-            bestAmountOfRobots[Resource.ORE] = (minutes - firstResourceInRound[Resource.CLAY]!!) / b.blueprints[Resource.CLAY]!!.max
+//
+//            val bestAmountOfRobots = mutableMapOf<Resource, Int>()
+//            bestAmountOfRobots[Resource.GEODE] = (minutes - firstResourceInRound[Resource.GEODE]!!) / b.blueprints[Resource.GEODE]!!.max
+//            bestAmountOfRobots[Resource.OBSIDIAN] = (minutes - firstResourceInRound[Resource.OBSIDIAN]!!) / b.blueprints[Resource.OBSIDIAN]!!.max
+//            bestAmountOfRobots[Resource.CLAY] = (minutes - firstResourceInRound[Resource.CLAY]!!) / b.blueprints[Resource.CLAY]!!.max
+//            bestAmountOfRobots[Resource.ORE] = (minutes - firstResourceInRound[Resource.CLAY]!!) / b.blueprints[Resource.CLAY]!!.max
 
 //            Pair(b.id, 24 - firstResourceInRound[Resource.GEODE]!!)
 
@@ -64,6 +67,45 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
 
         return Result(plans.sumOf { it.first * it.second })
     }
+
+//    fun test(bluePrints: List<BluePrint>) {
+//        val minutes = 24
+//        val startRobots = Resources(mapOf(Resource.ORE to 1))
+//        val b = bluePrints.find { it.id == 1 }!!
+//        val latestRoundForResource = mutableMapOf<Resource, Int>()
+//        latestRoundForResource[Resource.GEODE] = minutes - 1
+//        latestRoundForResource[Resource.OBSIDIAN] = latestRoundForResource[Resource.GEODE]!! - getMinRoundsToEarn(b.blueprints[Resource.GEODE]!![Resource.OBSIDIAN])
+//        latestRoundForResource[Resource.CLAY] = latestRoundForResource[Resource.OBSIDIAN]!! - getMinRoundsToEarn(b.blueprints[Resource.OBSIDIAN]!![Resource.CLAY])
+//        val example = Log(maxDepth = 24, blueprints = b.blueprints, robots = startRobots, latestRoundForResource = latestRoundForResource)
+//            .nextRound(null)        // 1
+//            .nextRound(null)        // 2
+//            .nextRound(Resource.CLAY)     // 3
+//            .nextRound(null)        // 4
+//            .nextRound(Resource.CLAY)     // 5
+//            .nextRound(null)        // 6
+//            .nextRound(Resource.CLAY)     // 7
+//            .nextRound(null)        // 8
+//            .nextRound(null)        // 9
+//            .nextRound(null)        // 10
+//            .nextRound(Resource.OBSIDIAN) // 11
+//            .nextRound(Resource.CLAY)     // 12
+//            .nextRound(null)        // 13
+//            .nextRound(null)        // 14
+//            .nextRound(Resource.OBSIDIAN) // 15
+//            .nextRound(null)        // 16
+//            .nextRound(null)        // 17
+//            .nextRound(Resource.GEODE)    // 18
+//            .nextRound(null)        // 19
+//            .nextRound(null)        // 20
+//            .nextRound(Resource.GEODE)    // 21
+//            .nextRound(null)        // 22
+//            .nextRound(null)        // 23
+//            .nextRound(null)        // 24
+//            assert(example.inventory[Resource.GEODE] == 9)
+//            assert(example.inventory[Resource.OBSIDIAN] == 8)
+//            assert(example.inventory[Resource.CLAY] == 41)
+//            assert(example.inventory[Resource.ORE] == 6)
+//    }
 
     private fun getMinRoundsToEarn(amount: Int): Int {
         return if (amount == 0) 0
@@ -80,7 +122,8 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
 
     private fun dfs(
         log: Log,
-        best: SolutionHolder
+        best: SolutionHolder,
+        buildBlacklist: Resource? = null
     ) {
         if (log.dead) {
             return
@@ -90,9 +133,14 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
                 best.geodes = log.inventory[Resource.GEODE]
             }
         } else {
-            val buildPossibilities = log.getPossibleBuilds() + listOf(null)
+            val buildPossibilities = log.getPossibleBuilds().filter { it != buildBlacklist }
             for (robot in buildPossibilities) {
                 dfs(log.nextRound(robot), best)
+            }
+            if (buildPossibilities.size == 1) {
+                dfs(log.nextRound(null), best, buildPossibilities.first())
+            } else {
+                dfs(log.nextRound(null), best)
             }
         }
     }
@@ -116,23 +164,28 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
         val inventory: Resources = Resources.ZERO,
         val round: Int = 1
     ) {
-        val mostExpensiveRobotCosts = Resource.values()
+        val maximumRequirement = Resource.values()
             .associateWith { r ->
-                blueprints.maxOf { it.value[r] * 4 }
+                if (r == Resource.GEODE) maxDepth
+                else blueprints.entries.maxOf { it.value[r] }
             }
-        val done = round == maxDepth
+        val done = round > maxDepth
         val dead = latestRoundForResource.entries.any { it.value < round && robots[it.key] == 0 }
 
         fun getPossibleBuilds(): Collection<Resource> {
-            return blueprints
+            return if (round == maxDepth)
+                emptyList()
+            else if (blueprints[Resource.GEODE]!! in inventory)
+                listOf(Resource.GEODE)
+            else blueprints
                 .filter {
                     it.value in inventory
                 }
                 .filter {
-                    inventory[it.key] <= mostExpensiveRobotCosts[it.key]!!
+                    inventory[it.key] <= maximumRequirement[it.key]!! + maximumRequirement[it.key]!! - robots[it.key]
                 }
                 .filter {
-                    robots[it.key] < 5
+                    robots[it.key] <= maximumRequirement[it.key]!!
                 }
                 .map {
                     it.key
@@ -140,7 +193,7 @@ class Day19(): AbstractLinesAdventDay<Day19.Result>() {
                 .sortedByDescending { it.ordinal }
         }
         fun nextRound(robot: Resource?): Log {
-            if (round >= maxDepth) {
+            if (round > maxDepth) {
                 throw IllegalArgumentException("time is over")
             }
             if (robot != null && blueprints[robot]!! !in inventory) {
