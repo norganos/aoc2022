@@ -33,37 +33,93 @@ class Day17(
             }
             .toList()
 
-        val chamber = Chamber()
-        val rocksStart = rockCycle(jetPattern, chamber, blockCount)
-        val heightStart = chamber.savedHeight + chamber.minY
-        val topShapeStart = chamber.topRocks.flatMap { it.points }
-            .let { s ->
-                val toBottom = Vector(0, -s.minOf { it.y })
-                s.map { it + toBottom }
+        val c = Chamber()
+        val testdata = cycleDetector(jetPattern, c, 15_000)
+        val testdatasize = testdata.size
+
+        var cycleInfo: CycleInfo? = null
+        for (cyclelen in 3 until 50) {
+            val dropped = testdatasize % cyclelen
+            val chunked = testdata.drop(dropped).chunked(cyclelen)
+            val possibleCycle = chunked.last().map { CycleDataPattern(it.rocksDelta, it.heightDelta, it.rockIndex, it.jetIndex) }
+            val iterations = chunked
+                .reversed()
+                .takeWhile { chunk -> chunk.map { CycleDataPattern(it.rocksDelta, it.heightDelta, it.rockIndex, it.jetIndex) } == possibleCycle }
+                .count()
+            if (iterations > 1) {
+                println("found a cycle $possibleCycle")
+                val chunkedCycleStart = chunked.size - iterations
+                assert(chunked[chunkedCycleStart].map { CycleDataPattern(it.rocksDelta, it.heightDelta, it.rockIndex, it.jetIndex) } == possibleCycle)
+                val cycleStart = chunkedCycleStart * cyclelen + dropped
+                cycleInfo = CycleInfo(
+                    beforeCycle = RockPile(testdata[cycleStart+cyclelen-1].rocks, testdata[cycleStart+cyclelen-1].height, testdata[cycleStart+cyclelen-1].jetIndex),
+                    cycle = RockPile(possibleCycle.sumOf { it.rocksDelta }, possibleCycle.sumOf { it.heightDelta }, possibleCycle.last().jetIndex),
+                )
+
+
+                val simulated = Chamber()
+                val calculated = Chamber()
+                val proofCount = cycleInfo.beforeCycle.rocks + 123
+                val simulatedPile = rockCycle(jetPattern, simulated, proofCount)
+                val head = rockCycle(jetPattern, calculated, cycleInfo.beforeCycle.rocks)
+                val cycleCount = (proofCount - cycleInfo.beforeCycle.rocks) / cycleInfo.cycle.rocks
+                val remainder = (proofCount - cycleInfo.beforeCycle.rocks) % cycleInfo.cycle.rocks
+                val tail = rockCycle(jetPattern, calculated, remainder, cycleInfo.beforeCycle.jetIndex)
+
+                assert(cycleCount * cycleInfo.cycle.height + calculated.height == simulated.height)
+                break
             }
-            .toSet()
-        val rocksPerCycle = rockCycle(jetPattern, chamber, blockCount - rocksStart)
-        if (rocksPerCycle == 0L) {
-            return Result(
-                heightStart
-            )
         }
-        val heightPerCycle = chamber.savedHeight + chamber.minY - heightStart
-        val topShapeAfterCycle = chamber.topRocks.flatMap { it.points }
-            .let { s ->
-                val toBottom = Vector(0, -s.minOf { it.y })
-                s.map { it + toBottom }
+
+
+
+        val chamber = Chamber()
+        return if (cycleInfo != null && blockCount > cycleInfo.beforeCycle.rocks + cycleInfo.cycle.rocks) {
+            val head = rockCycle(jetPattern, chamber, cycleInfo.beforeCycle.rocks)
+            val cycleCount = (blockCount - cycleInfo.beforeCycle.rocks) / cycleInfo.cycle.rocks
+            val remainder = (blockCount - cycleInfo.beforeCycle.rocks) % cycleInfo.cycle.rocks
+            val tail = rockCycle(jetPattern, chamber, remainder, cycleInfo.beforeCycle.jetIndex)
+
+            Result(cycleCount * cycleInfo.cycle.height + chamber.height)
+        } else {
+            if (cycleInfo == null) {
+                println("did not find a cycle :-/ have to simulate all $blockCount rocks")
             }
-            .toSet()
-        assert(topShapeStart == topShapeAfterCycle)
-        val cycles = (blockCount - rocksStart) / rocksPerCycle
-        val rest = blockCount - rocksStart - cycles * rocksPerCycle
-        val rocksEnd = rockCycle(jetPattern, chamber, rest)
-        assert(rocksStart + cycles * rocksPerCycle + rocksEnd == blockCount)
-        val heightEnd = chamber.savedHeight + chamber.minY - heightPerCycle - heightStart
-        return Result(
-            heightStart + cycles * heightPerCycle + heightEnd
-        )
+            rockCycle(jetPattern, chamber, blockCount)
+            Result(chamber.height)
+        }
+
+
+//        val rocksStartState = rockCycle(jetPattern, chamber, blockCount)
+//        val heightStart = chamber.savedHeight + chamber.minY
+//        val topShapeStart = chamber.topRocks.flatMap { it.points }
+//            .let { s ->
+//                val toBottom = Vector(0, -s.minOf { it.y })
+//                s.map { it + toBottom }
+//            }
+//            .toSet()
+//        val rocksPerCycleState = rockCycle(jetPattern, chamber, blockCount - rocksStartState.rocks, rocksStartState.floating)
+//        if (rocksPerCycleState.rocks == 0L) {
+//            return Result(
+//                heightStart
+//            )
+//        }
+//        val heightPerCycle = chamber.savedHeight + chamber.minY - heightStart
+//        val topShapeAfterCycle = chamber.topRocks.flatMap { it.points }
+//            .let { s ->
+//                val toBottom = Vector(0, -s.minOf { it.y })
+//                s.map { it + toBottom }
+//            }
+//            .toSet()
+////        assert(topShapeStart == topShapeAfterCycle)
+//        val cycles = (blockCount - rocksStartState.rocks) / rocksPerCycleState.rocks
+//        val rest = blockCount - rocksStartState.rocks - cycles * rocksPerCycleState.rocks
+//        val rocksEndState = rockCycle(jetPattern, chamber, rest, rocksPerCycleState.floating)
+////        assert(rocksStartState.rocks + cycles * rocksPerCycleState.rocks + rocksEndState.rocks == blockCount)
+//        val heightEnd = chamber.savedHeight + chamber.minY - heightPerCycle - heightStart
+//        return Result(
+//            heightStart + cycles * heightPerCycle + heightEnd
+//        )
 //        if (blockCount > 2 * jetPattern.size) {
 //            rockSequence()
 //                .takeWhile { steps++ < jetPattern.size }
@@ -123,13 +179,74 @@ class Day17(
         }
     }
 
-    fun rockCycle(jetPatterns: List<Vector>, chamber: Chamber, maxRocks: Long): Long {
+
+    fun rockCycle(jetPatterns: List<Vector>, chamber: Chamber, maxRocks: Long, jetStart: Int = 0): RockPile {
+        var rocks = 0L
+        var j = jetStart
+        var r = 0
+        val startHeight = chamber.height
+        while (rocks < maxRocks) {
+            var rock = rockPatterns[r].plus(Vector(0, chamber.minY + 4))
+            r = (r + 1) % rockPatterns.size
+            while (true) {
+                var r = rock + jetPatterns[j]
+                j = (j + 1) % jetPatterns.size
+                rock = if (r in chamber && !chamber.blocks(r)) r else rock
+                r = rock + down
+                if (chamber.blocks(r)) {
+                    chamber.put(rock)
+                    break
+                } else {
+                    rock = r
+                }
+            }
+            rocks++
+        }
+        return RockPile(rocks, chamber.height - startHeight, j)
+    }
+
+    data class CycleData(
+        val rocks: Long,
+        val rocksDelta: Long,
+        val height: Long,
+        val heightDelta: Long,
+        val rockIndex: Int,
+        val jetIndex: Int
+    )
+    data class CycleDataPattern(
+        val rocksDelta: Long,
+        val heightDelta: Long,
+        val rockIndex: Int,
+        val jetIndex: Int
+    )
+
+    data class RockPile(
+        val rocks: Long,
+        val height: Long,
+        val jetIndex: Int
+    )
+    data class CycleInfo(
+        val beforeCycle: RockPile,
+        val cycle: RockPile
+    )
+    fun cycleDetector(jetPatterns: List<Vector>, chamber: Chamber, maxRocks: Long): List<CycleData> {
+        val result = mutableListOf<CycleData>()
         var rocks = 0L
         var j = 0
         var r = 0
+        var lastCycleData = CycleData(0, 0, 0, 0, 0, 0)
         while (rocks < maxRocks) {
-            if (rocks > 0 && j == 0 && r == 0) {
-                return rocks
+            if (r == 0) {
+                val cycleData = CycleData(
+                    rocks,
+                    rocks - lastCycleData.rocks,
+                    chamber.height,
+                    chamber.height - lastCycleData.height,
+                    r,
+                    j
+                )
+                result.add(cycleData)
+                lastCycleData = cycleData
             }
             var rock = rockPatterns[r].plus(Vector(0, chamber.minY + 4))
             r = (r + 1) % rockPatterns.size
@@ -147,7 +264,7 @@ class Day17(
             }
             rocks++
         }
-        return rocks
+        return result
     }
 
     class Chamber(
@@ -157,6 +274,8 @@ class Day17(
         var minY = 0
         var savedHeight = 0L
         var blockCount = 0L
+
+        val height get(): Long = savedHeight + minY
 
         var topRocks: List<Shape> = emptyList()
 

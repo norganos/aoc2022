@@ -32,11 +32,11 @@ class Day17Test {
         )
     }
 
-//    @Test
-//    fun `solution part 2`() {
-//        assertEquals(
-//            2838,
-//            Day16().solve(emptyList()).sumReleasedPressure2
-//        )
-//    }
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            0,
+            Day17().solve(emptyList()).height
+        )
+    }
 }
