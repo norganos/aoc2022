@@ -35,7 +35,7 @@ class Day17Test {
     @Test
     fun `solution part 2`() {
         assertEquals(
-            0,
+            1570930232582,
             Day17().solve(emptyList()).height
         )
     }

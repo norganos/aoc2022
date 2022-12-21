@@ -1,6 +1,7 @@
 package de.linkel.aoc
 
 import de.linkel.aoc.base.AbstractFileAdventDay
+import de.linkel.aoc.utils.grid.Dimension
 import de.linkel.aoc.utils.grid.Point
 import de.linkel.aoc.utils.grid.Vector
 import de.linkel.aoc.utils.readers.ReaderSequence
@@ -10,6 +11,7 @@ import java.io.BufferedReader
 import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.math.max
+import kotlin.math.min
 
 @Singleton
 class Day17(
@@ -34,151 +36,31 @@ class Day17(
             .toList()
 
         val c = Chamber()
-        val testdata = cycleDetector(jetPattern, c, 15_000)
-        val testdatasize = testdata.size
-
-        var cycleInfo: CycleInfo? = null
-        for (cyclelen in 3 until 50) {
-            val dropped = testdatasize % cyclelen
-            val chunked = testdata.drop(dropped).chunked(cyclelen)
-            val possibleCycle = chunked.last().map { CycleDataPattern(it.rocksDelta, it.heightDelta, it.rockIndex, it.jetIndex) }
-            val iterations = chunked
-                .reversed()
-                .takeWhile { chunk -> chunk.map { CycleDataPattern(it.rocksDelta, it.heightDelta, it.rockIndex, it.jetIndex) } == possibleCycle }
-                .count()
-            if (iterations > 1) {
-                println("found a cycle $possibleCycle")
-                val chunkedCycleStart = chunked.size - iterations
-                assert(chunked[chunkedCycleStart].map { CycleDataPattern(it.rocksDelta, it.heightDelta, it.rockIndex, it.jetIndex) } == possibleCycle)
-                val cycleStart = chunkedCycleStart * cyclelen + dropped
-                cycleInfo = CycleInfo(
-                    beforeCycle = RockPile(testdata[cycleStart+cyclelen-1].rocks, testdata[cycleStart+cyclelen-1].height, testdata[cycleStart+cyclelen-1].jetIndex),
-                    cycle = RockPile(possibleCycle.sumOf { it.rocksDelta }, possibleCycle.sumOf { it.heightDelta }, possibleCycle.last().jetIndex),
-                )
-
-
-                val simulated = Chamber()
-                val calculated = Chamber()
-                val proofCount = cycleInfo.beforeCycle.rocks + 123
-                val simulatedPile = rockCycle(jetPattern, simulated, proofCount)
-                val head = rockCycle(jetPattern, calculated, cycleInfo.beforeCycle.rocks)
-                val cycleCount = (proofCount - cycleInfo.beforeCycle.rocks) / cycleInfo.cycle.rocks
-                val remainder = (proofCount - cycleInfo.beforeCycle.rocks) % cycleInfo.cycle.rocks
-                val tail = rockCycle(jetPattern, calculated, remainder, cycleInfo.beforeCycle.jetIndex)
-
-                assert(cycleCount * cycleInfo.cycle.height + calculated.height == simulated.height)
-                break
+        val cycleInfo = cycleDetector(jetPattern, c, min(blockCount, 0L + jetPattern.size * rockPatterns.size))
+            .runningFold(CycleDetectionAggregate(jetPattern.size)) { buffer, status ->
+                buffer + status
             }
-        }
-
-
+            .firstNotNullOfOrNull { it.detectCycle() }
 
         val chamber = Chamber()
         return if (cycleInfo != null && blockCount > cycleInfo.beforeCycle.rocks + cycleInfo.cycle.rocks) {
-            val head = rockCycle(jetPattern, chamber, cycleInfo.beforeCycle.rocks)
+            println("found a cycle with length ${cycleInfo.cycle.rocks}")
+            rockCycle(jetPattern, chamber, cycleInfo.beforeCycle.rocks)
             val cycleCount = (blockCount - cycleInfo.beforeCycle.rocks) / cycleInfo.cycle.rocks
             val remainder = (blockCount - cycleInfo.beforeCycle.rocks) % cycleInfo.cycle.rocks
-            val tail = rockCycle(jetPattern, chamber, remainder, cycleInfo.beforeCycle.jetIndex)
+            rockCycle(jetPattern, chamber, remainder, cycleInfo.beforeCycle.jetIndex)
 
             Result(cycleCount * cycleInfo.cycle.height + chamber.height)
         } else {
             if (cycleInfo == null) {
                 println("did not find a cycle :-/ have to simulate all $blockCount rocks")
+            } else {
+                println("found a cycle that starts after $blockCount rocks")
             }
             rockCycle(jetPattern, chamber, blockCount)
             Result(chamber.height)
         }
-
-
-//        val rocksStartState = rockCycle(jetPattern, chamber, blockCount)
-//        val heightStart = chamber.savedHeight + chamber.minY
-//        val topShapeStart = chamber.topRocks.flatMap { it.points }
-//            .let { s ->
-//                val toBottom = Vector(0, -s.minOf { it.y })
-//                s.map { it + toBottom }
-//            }
-//            .toSet()
-//        val rocksPerCycleState = rockCycle(jetPattern, chamber, blockCount - rocksStartState.rocks, rocksStartState.floating)
-//        if (rocksPerCycleState.rocks == 0L) {
-//            return Result(
-//                heightStart
-//            )
-//        }
-//        val heightPerCycle = chamber.savedHeight + chamber.minY - heightStart
-//        val topShapeAfterCycle = chamber.topRocks.flatMap { it.points }
-//            .let { s ->
-//                val toBottom = Vector(0, -s.minOf { it.y })
-//                s.map { it + toBottom }
-//            }
-//            .toSet()
-////        assert(topShapeStart == topShapeAfterCycle)
-//        val cycles = (blockCount - rocksStartState.rocks) / rocksPerCycleState.rocks
-//        val rest = blockCount - rocksStartState.rocks - cycles * rocksPerCycleState.rocks
-//        val rocksEndState = rockCycle(jetPattern, chamber, rest, rocksPerCycleState.floating)
-////        assert(rocksStartState.rocks + cycles * rocksPerCycleState.rocks + rocksEndState.rocks == blockCount)
-//        val heightEnd = chamber.savedHeight + chamber.minY - heightPerCycle - heightStart
-//        return Result(
-//            heightStart + cycles * heightPerCycle + heightEnd
-//        )
-//        if (blockCount > 2 * jetPattern.size) {
-//            rockSequence()
-//                .takeWhile { steps++ < jetPattern.size }
-//                .forEach { rockRound(jets, chamber, it) }
-//            steps = 0L
-//            rockSequence()
-//                .takeWhile { steps++ < jetPattern.size }
-//                .forEach { rockRound(jets, chamber, it) }
-//            val heightCycle2 = chamber.savedHeight + chamber.minY - heightCycle1
-//            val rocksCycle2 = chamber.blockCount - rocksCycle1
-//            val topShapeCycle2 = chamber.topRocks.flatMap { it.points }
-//                .let { s ->
-//                    val toBottom = Vector(0, -s.minOf { it.y })
-//                    s.map { it + toBottom }
-//                }
-//                .toSet()
-//            assert(topShapeCycle1 == topShapeCycle2)
-//            steps = 0L
-//            rockSequence()
-//                .takeWhile { steps++ < (blockCount % jetPattern.size) }
-//                .forEach { rockRound(jets, chamber, it) }
-//            val heightTail = chamber.savedHeight + chamber.minY - heightCycle2 - heightCycle1
-//            val rocksTail = chamber.blockCount - rocksCycle2 - rocksCycle1
-//
-//
-//            return Result(
-//                heightCycle1 + (blockCount / rocksCycle2 - 1) * heightCycle2 + heightTail
-//            )
-//        } else {
-//            val chamber = Chamber()
-//            var steps = 0L
-//            val jets = jetSequence(jetPattern).iterator()
-//            rockSequence()
-//                .takeWhile { steps++ < blockCount }
-//                .forEach { rockRound(jets, chamber, it) }
-//            return Result(
-//                chamber.savedHeight + chamber.minY
-//            )
-//        }
     }
-
-    fun rockRound(jets: Iterator<Vector>, chamber: Chamber, rockTemplate: Shape) {
-        var rock = rockTemplate.plus(Vector(0, chamber.minY + 4))
-//                println("\n\n\n")
-//                chamber.print(rock)
-        while (true) {
-//                    steps++
-            var r = rock + jets.next()
-            rock = if (r in chamber && !chamber.blocks(r)) r else rock
-            r = rock + down
-            if (chamber.blocks(r)) {
-                chamber.put(rock)
-                break
-            } else {
-                rock = r
-            }
-        }
-    }
-
 
     fun rockCycle(jetPatterns: List<Vector>, chamber: Chamber, maxRocks: Long, jetStart: Int = 0): RockPile {
         var rocks = 0L
@@ -189,15 +71,15 @@ class Day17(
             var rock = rockPatterns[r].plus(Vector(0, chamber.minY + 4))
             r = (r + 1) % rockPatterns.size
             while (true) {
-                var r = rock + jetPatterns[j]
+                var nextRock = rock + jetPatterns[j]
                 j = (j + 1) % jetPatterns.size
-                rock = if (r in chamber && !chamber.blocks(r)) r else rock
-                r = rock + down
-                if (chamber.blocks(r)) {
+                rock = if (nextRock in chamber && !chamber.blocks(nextRock)) nextRock else rock
+                nextRock = rock + down
+                if (chamber.blocks(nextRock)) {
                     chamber.put(rock)
                     break
                 } else {
-                    rock = r
+                    rock = nextRock
                 }
             }
             rocks++
@@ -205,20 +87,87 @@ class Day17(
         return RockPile(rocks, chamber.height - startHeight, j)
     }
 
+    class CycleDetectionAggregate(
+        val bufferSize: Int
+    ) {
+        val buffer = mutableListOf<CycleData>()
+        private val bufferSet = mutableSetOf<CycleDataPattern>()
+        var lastData = CycleData()
+            private set
+        operator fun plus(data: CycleData): CycleDetectionAggregate {
+            if (buffer.size == bufferSize) {
+                val old = buffer.removeAt(0)
+                bufferSet.remove(old.toPattern())
+            }
+            buffer.add(lastData)
+            bufferSet.add(lastData.toPattern())
+            lastData = data
+            return this
+        }
+
+        fun detectCycle(): CycleInfo? {
+            val pattern = lastData.toPattern()
+            return if (bufferSet.contains(pattern)) {
+                val cycleStart = buffer.indexOfFirst { it.toPattern() == pattern }
+                val cycleElements = buffer.subList(cycleStart, buffer.size)
+                CycleInfo(
+                    beforeCycle = RockPile(
+                        rocks = buffer[cycleStart].rocks,
+                        height = buffer[cycleStart].height,
+                        jetIndex = buffer[cycleStart].jetIndex
+                    ),
+                    cycle = RockPile(
+                        rocks = cycleElements.sumOf { it.rocksDelta },
+                        height = cycleElements.sumOf { it.heightDelta },
+                        jetIndex = buffer.last().jetIndex
+                    )
+                )
+            } else null
+        }
+    }
+
     data class CycleData(
-        val rocks: Long,
-        val rocksDelta: Long,
-        val height: Long,
-        val heightDelta: Long,
-        val rockIndex: Int,
-        val jetIndex: Int
-    )
+        val rocks: Long = 0,
+        val rocksDelta: Long = 0,
+        val height: Long = 0,
+        val heightDelta: Long = 0,
+        val rockIndex: Int = 0,
+        val jetIndex: Int = 0,
+        val surface: ByteArray = ByteArray(0)
+    ) {
+        fun toPattern(): CycleDataPattern = CycleDataPattern(rocksDelta, heightDelta, rockIndex, jetIndex, surface)
+    }
     data class CycleDataPattern(
         val rocksDelta: Long,
         val heightDelta: Long,
         val rockIndex: Int,
-        val jetIndex: Int
-    )
+        val jetIndex: Int,
+        val surface: ByteArray
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as CycleDataPattern
+
+            if (rocksDelta != other.rocksDelta) return false
+            if (heightDelta != other.heightDelta) return false
+            if (rockIndex != other.rockIndex) return false
+            if (jetIndex != other.jetIndex) return false
+            if (!surface.contentEquals(other.surface)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = rocksDelta.hashCode()
+            result = 31 * result + heightDelta.hashCode()
+            result = 31 * result + rockIndex
+            result = 31 * result + jetIndex
+            result = 31 * result + surface.contentHashCode()
+            return result
+        }
+    }
 
     data class RockPile(
         val rocks: Long,
@@ -229,48 +178,50 @@ class Day17(
         val beforeCycle: RockPile,
         val cycle: RockPile
     )
-    fun cycleDetector(jetPatterns: List<Vector>, chamber: Chamber, maxRocks: Long): List<CycleData> {
-        val result = mutableListOf<CycleData>()
-        var rocks = 0L
-        var j = 0
-        var r = 0
-        var lastCycleData = CycleData(0, 0, 0, 0, 0, 0)
-        while (rocks < maxRocks) {
-            if (r == 0) {
-                val cycleData = CycleData(
-                    rocks,
-                    rocks - lastCycleData.rocks,
-                    chamber.height,
-                    chamber.height - lastCycleData.height,
-                    r,
-                    j
-                )
-                result.add(cycleData)
-                lastCycleData = cycleData
-            }
-            var rock = rockPatterns[r].plus(Vector(0, chamber.minY + 4))
-            r = (r + 1) % rockPatterns.size
-            while (true) {
-                var r = rock + jetPatterns[j]
-                j = (j + 1) % jetPatterns.size
-                rock = if (r in chamber && !chamber.blocks(r)) r else rock
-                r = rock + down
-                if (chamber.blocks(r)) {
-                    chamber.put(rock)
-                    break
-                } else {
-                    rock = r
+    fun cycleDetector(jetPatterns: List<Vector>, chamber: Chamber, maxRocks: Long): Sequence<CycleData> {
+        return sequence {
+            var rocks = 0L
+            var j = 0
+            var r = 0
+            var lastCycleData = CycleData()
+            while (rocks < maxRocks) {
+                if (r == 0) {
+                    val cycleData = CycleData(
+                        rocks,
+                        rocks - lastCycleData.rocks,
+                        chamber.height,
+                        chamber.height - lastCycleData.height,
+                        r,
+                        j,
+                        chamber.hash
+                    )
+                    lastCycleData = cycleData
+                    yield(cycleData)
                 }
+                var rock = rockPatterns[r].plus(Vector(0, chamber.minY + 4))
+                r = (r + 1) % rockPatterns.size
+                while (true) {
+                    var nextRock = rock + jetPatterns[j]
+                    j = (j + 1) % jetPatterns.size
+                    rock = if (nextRock in chamber && !chamber.blocks(nextRock)) nextRock else rock
+                    nextRock = rock + down
+                    if (chamber.blocks(nextRock)) {
+                        chamber.put(rock)
+                        break
+                    } else {
+                        rock = nextRock
+                    }
+                }
+                rocks++
             }
-            rocks++
         }
-        return result
     }
 
     class Chamber(
         val minX: Int = 0,
         val maxX: Int = 6
     ) {
+        val hashSize = 16
         var minY = 0
         var savedHeight = 0L
         var blockCount = 0L
@@ -278,6 +229,7 @@ class Day17(
         val height get(): Long = savedHeight + minY
 
         var topRocks: List<Shape> = emptyList()
+        var hash: ByteArray = ByteArray(hashSize) { _ -> 0.toByte() }
 
         operator fun contains(s: Shape): Boolean {
             return s.points.all { it.x in minX..maxX }
@@ -289,16 +241,9 @@ class Day17(
 
         fun put(s: Shape) {
             blockCount++
-//            val xx = mutableSetOf(0,1,2,3,4,5,6)
-//            val backup = topRocks
             topRocks = (topRocks + s)
                 .sortedByDescending { r -> r.points.maxOf { it.y } }
                 .take(50)
-//                .takeWhile { r ->
-//                    val removed = xx.removeAll(r.points.map { it.x }.toSet())
-//                    removed || xx.isNotEmpty()
-//                }
-//                .toList()
             minY = topRocks.maxOf { r -> r.points.maxOf { it.y } }
             if (minY > 10_000) {
                 savedHeight += 10_000
@@ -307,8 +252,19 @@ class Day17(
                     it + transform
                 }
             }
+
+            hash = ByteArray(hashSize) { i ->
+                topRocks
+                    .flatMap { it.points }
+                    .filter { it.y == minY - hashSize + i }
+                    .fold( 0) { b, p ->
+                        b or (1 shl p.x)
+                    }
+                    .toByte()
+            }
         }
 
+        @Suppress("unused")
         fun print(floating: Shape?) {
 
             (max(minY, floating?.points?.maxOf { it.y } ?: 0) downTo 1).forEach { y ->
@@ -325,7 +281,7 @@ class Day17(
 
     val rockPatterns = listOf(
         Shape(
-            listOf(
+            setOf(
                 Point(2, 0),
                 Point(3, 0),
                 Point(4, 0),
@@ -333,7 +289,7 @@ class Day17(
             )
         ),
         Shape(
-            listOf(
+            setOf(
                 Point(3, 2),
                 Point(2, 1),
                 Point(3, 1),
@@ -342,7 +298,7 @@ class Day17(
             )
         ),
         Shape(
-            listOf(
+            setOf(
                 Point(4, 2),
                 Point(4, 1),
                 Point(2, 0),
@@ -351,7 +307,7 @@ class Day17(
             )
         ),
         Shape(
-            listOf(
+            setOf(
                 Point(2, 3),
                 Point(2, 2),
                 Point(2, 1),
@@ -359,7 +315,7 @@ class Day17(
             )
         ),
         Shape(
-            listOf(
+            setOf(
                 Point(2, 1),
                 Point(3, 1),
                 Point(2, 0),
@@ -368,26 +324,31 @@ class Day17(
         )
     )
 
-    fun rockSequence(): Sequence<Shape> {
-        var pos = 0
-        return generateSequence {
-            rockPatterns[pos++ % rockPatterns.size]
-        }
-    }
-
-    fun jetSequence(pattern: List<Vector>): Sequence<Vector> {
-        var pos = 0
-        return generateSequence {
-            pattern[pos++ % pattern.size]
-        }
-    }
-
     data class Shape(
-        val points: List<Point>
+        val points: Set<Point>
     ) {
+        val boundingBox = Dimension(
+            points.maxOf { it.x } - points.minOf { it.x } + 1,
+            points.maxOf { it.y } - points.minOf { it.y } + 1
+        )
+        val bottomY = points.minOf { it.y }
+        val bytes: ByteArray
+
+        // this code here because we know our x will always be between 0 and 7
+        init {
+            bytes = ByteArray(boundingBox.height) { i ->
+                points
+                    .filter { it.y == bottomY + i }
+                    .fold( 0) { b, p ->
+                        b or (1 shl p.x)
+                    }
+                    .toByte()
+            }
+        }
+
         operator fun plus(v: Vector): Shape {
             return copy(
-                points = points.map { it + v }
+                points = points.map { it + v }.toSet()
             )
         }
         fun intersects(s: Shape): Boolean {
