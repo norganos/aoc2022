@@ -7,10 +7,9 @@ class Grid<T: Any>(
     dimension: Dimension = Dimension(0,0)
 ) {
     companion object {
-        fun <T: Any> parse(lines: Sequence<String>, lambda: (pos: Point, c: Char) -> T): Grid<T> {
+        fun <T: Any> parse(lines: Sequence<String>, lambda: (pos: Point, c: Char) -> T?): Grid<T> {
             val grid = Grid<T>()
             lines
-                .map { it.trim() }
                 .filter { it.isNotEmpty() }
                 .forEachIndexed { y, line ->
                     val chars = line
@@ -19,9 +18,13 @@ class Grid<T: Any>(
                         .forEachIndexed { x, c ->
                             val p = Point(x, y)
                             grid.stretchTo(p)
-                            grid[p] = lambda(p, c)
+                            val t = lambda(p, c)
+                            if (t != null) {
+                                grid[p] = t
+                            }
                         }
                 }
+            grid.crop()
             return grid
         }
     }
@@ -77,7 +80,7 @@ class Grid<T: Any>(
         val minY = store.keys.minOf { it.y }
         val maxX = store.keys.maxOf { it.x }
         val maxY = store.keys.maxOf { it.y }
-        return Area(minX, minY, maxX - minX, maxY - minY)
+        return Area(minX, minY, maxX - minX + 1, maxY - minY + 1)
     }
 
     @Suppress("unused")
@@ -89,7 +92,7 @@ class Grid<T: Any>(
     }
 
     fun getRowData(y: Int): List<DataPoint<T>> {
-        return List(width) { dx ->
+        return List(area.width) { dx ->
                 Point(area.x + dx, y)
             }
             .filter { store[it] != null }
