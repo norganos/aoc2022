@@ -10,6 +10,12 @@ data class Area(
     val height: Int
 ) {
     val origin = Point(x, y)
+    val northWest get(): Point = Point(x, y)
+    @Suppress("unused")
+    val northEast get(): Point = Point(x + width - 1, y)
+    val southEast get(): Point = Point(x + width - 1, y + height - 1)
+    @Suppress("unused")
+    val southWest get(): Point = Point(x, y + height - 1)
     val dimension = Dimension(width, height)
 
     operator fun contains(point: Point): Boolean {
