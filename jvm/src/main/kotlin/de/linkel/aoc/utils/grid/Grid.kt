@@ -149,6 +149,14 @@ class Grid<T: Any>(
             }
     }
 
+    fun <R: Any> transformComplete(lambda: (points: Map<Point, T>) -> Map<Point, R>): Grid<R> {
+        return Grid<R>(area.origin, area.dimension)
+            .let { other ->
+                other.store.putAll(lambda(store))
+                other
+            }
+    }
+
     @Suppress("unused")
     fun copy(): Grid<T> {
         return Grid<T>(area.origin, area.dimension)
