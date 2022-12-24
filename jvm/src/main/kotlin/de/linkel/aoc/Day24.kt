@@ -5,14 +5,12 @@ import de.linkel.aoc.utils.grid.Area
 import de.linkel.aoc.utils.grid.Grid
 import de.linkel.aoc.utils.grid.Point
 import de.linkel.aoc.utils.grid.Vector
-import io.micronaut.context.annotation.Value
 import jakarta.inject.Singleton
+import java.lang.IllegalStateException
 
 
 @Singleton
-class Day24(
-    @Suppress("MnInjectionPoints") @Value("0") val rounds: Int = 0,
-): AbstractLinesAdventDay<Day24.Result>() {
+class Day24: AbstractLinesAdventDay<Day24.Result>() {
     override val day = 24
 
     val still = Vector(0, 0)
@@ -22,7 +20,7 @@ class Day24(
     val west = Vector(-1, 0)
 
     override fun process(lines: Sequence<String>): Result {
-        val map = Grid.parse(lines) { pos, c ->
+        val map = Grid.parse(lines) { _, c ->
             Tile(
                 wall = c == '#',
                 blizzards = when(c) {
@@ -36,23 +34,49 @@ class Day24(
         }
         val start = map.getRowData(map.area.origin.y).first { !it.data.wall }.point
         val dest = map.getRowData(map.area.origin.y + map.area.height - 1).first { !it.data.wall }.point
-        val path = bfs(listOf(listOf(start)), dest, map)
+        val trip1 = bfs(start, dest, map)
+        val trip2 = bfs(dest, start, trip1.first)
+        val trip3 = bfs(start, dest, trip2.first)
 
         return Result(
-            path.size - 1
+            trip1.second.size - 1,
+            trip1.second.size + trip2.second.size + trip3.second.size - 1,
         )
     }
 
-    private fun bfs(paths: List<List<Point>>, end: Point, map: Grid<Tile>): List<Point> {
-        val nextMap = traverseMap(map)
-        val nextPathes = paths.flatMap { path ->
+    private fun bfs(start: Point, end: Point, initMap: Grid<Tile>): Pair<Grid<Tile>, List<Point>> {
+        val queue = mutableListOf(listOf(start))
+        val visitedStates = mutableSetOf<Point>()
+        var round = 0
+        var map = initMap
+        while (true) {
+            val path = queue.removeAt(0)
+            if (path.last() == end) {
+                return Pair(map, path)
+            }
+            if (path.size > 5 && path.takeLast(5).distinct().size == 1) {
+                continue
+            }
+            if (path.size > round) {
+                round++
+                map = traverseMap(map)
+                visitedStates.clear()
+            }
+            if (path.size < round) {
+                throw IllegalStateException("map is already in round $round, can't process path for round ${path.size}")
+            }
             val pos = path.last()
-            listOf(still, north, east, south, west)
-                .map { pos + it }
-                .filter { it in nextMap && !nextMap[it]!!.wall && nextMap[it]!!.blizzards.isEmpty() }
-                .map { path + it }
+            if (pos in visitedStates) {
+                continue
+            }
+            visitedStates.add(pos)
+            queue.addAll(
+                listOf(still, north, east, south, west)
+                    .map { pos + it }
+                    .filter { it in map && !map[it]!!.wall && map[it]!!.blizzards.isEmpty() }
+                    .map { path + it }
+            )
         }
-        return nextPathes.firstOrNull { it.last() == end } ?: bfs(nextPathes, end, nextMap)
     }
 
     private fun traverseMap(map: Grid<Tile>): Grid<Tile> {
@@ -107,10 +131,11 @@ class Day24(
     }
 
     data class Result(
-        val value: Int
+        val part1: Int,
+        val part2: Int
     ) {
         override fun toString(): String {
-            return "$value"
+            return "$part1 steps forward, $part2 steps for forward, backward, forward again"
         }
     }
 }

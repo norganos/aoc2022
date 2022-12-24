@@ -17,31 +17,31 @@ class Day24Test {
     fun `example part 1`() {
         assertEquals(
             18,
-            Day24().test(aocExample).value
+            Day24().test(aocExample).part1
         )
     }
 
-//    @Test
-//    fun `example part 2`() {
-//        assertEquals(
-//            0,
-//            Day24().test(aocExample).value
-//        )
-//    }
+    @Test
+    fun `example part 2`() {
+        assertEquals(
+            54,
+            Day24().test(aocExample).part2
+        )
+    }
 
     @Test
     fun `solution part 1`() {
         assertEquals(
-            0,
-            Day24().solve(emptyList()).value
+            240,
+            Day24().solve(emptyList()).part1
         )
     }
 
-//    @Test
-//    fun `solution part 2`() {
-//        assertEquals(
-//            0,
-//            Day24().solve(emptyList()).value
-//        )
-//    }
+    @Test
+    fun `solution part 2`() {
+        assertEquals(
+            717,
+            Day24().solve(emptyList()).part2
+        )
+    }
 }
