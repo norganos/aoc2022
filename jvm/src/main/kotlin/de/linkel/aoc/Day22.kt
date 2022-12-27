@@ -139,30 +139,22 @@ class Day22(
             // beim zusammenklappen kommen immer zwei seiten zusammen, die am naechsten sind.
             // -> wir suchen uns erstmal die quadrate
             // -> dann suchen wir nach offenen seiten
-            // -> dann finden wir zu einer offenen seite die am naechsten liegende (noch nicht gepairte) andere offene seite
+            // -> dann finden wir zu einer offenen seite die am naechsten liegende (noch nicht gepairte) andere offene seite (ohne dieselben quadrate mehrfach zu verbinden)
             val quadrants = (0..3)
                 .flatMap { y ->
-                    (0..3).map { x -> Area(x * squareSize, y * squareSize, squareSize, squareSize)}
+                    (0..3).map { x ->
+                        Area(x * squareSize, y * squareSize, squareSize, squareSize)
+                    }
                 }
                 .filter { it.origin in map && map[it.origin] != null }
+                .onEachIndexed { i: Int, area: Area -> area.id = "${i+1}" }
             val edges = quadrants
                 .flatMap { it.getEdges() }
                 .filter { it.neighbourArea !in quadrants }
                 .toMutableList()
-//                .map { TopologyEdge(it) }
+
             assert(edges.size == 14)
-//            edges.forEach { edge ->
-//                edge.counterclockwiseNeighbourEdge = findEdge(edges, listOf(
-//                    Edge(edge.area, edge.side.left()),
-//                    Edge(edge.area + (edge.side.left().vector * edge.area.width), edge.side),
-//                    Edge(edge.area + (edge.side.left().vector * edge.area.width + edge.side.vector * edge.area.width), edge.side.right())
-//                ))
-//                edge.clockwiseNeighbourEdge = findEdge(edges, listOf(
-//                    Edge(edge.area, edge.side.right()),
-//                    Edge(edge.area + (edge.side.right().vector * edge.area.width), edge.side),
-//                    Edge(edge.area + (edge.side.right().vector * edge.area.width + edge.side.vector * edge.area.width), edge.side.left())
-//                ))
-//            }
+
             val ring = Ring<PairableEdge>()
             var last = ring.add(PairableEdge(edges.removeAt(0)))
             while (edges.isNotEmpty()) {
@@ -193,8 +185,8 @@ class Day22(
                     if (e.payload.paired) {
                         continue
                     }
-                    val n = e.first { !it.payload.paired }
-                    if (n.payload.area in areaConnections[e.payload.area]!! || e.payload.area in areaConnections[n.payload.area]!!) {
+                    val n = e.drop(1).first { !it.payload.paired }
+                    if (n.payload.area == e.payload.area || n.payload.area in areaConnections[e.payload.area]!! || e.payload.area in areaConnections[n.payload.area]!!) {
                         continue
                     }
                     if (e.distanceTo(n) == 1 && e.payload.side == n.payload.side) {
@@ -234,6 +226,10 @@ class Day22(
         val side: Direction
     ) {
         val neighbourArea = area + (side.vector * area.width)
+
+        override fun toString(): String {
+            return "${area.id} $side"
+        }
     }
     data class PairableEdge(
         val edge: Edge
@@ -246,10 +242,10 @@ class Day22(
 
         fun points(): List<Point> {
             return when (side) {
-                Direction.NORTH -> if (pairDistance < 0) area.northWest upTo area.northEast else area.northEast upTo area.northWest
-                Direction.SOUTH -> if (pairDistance < 0) area.southEast upTo area.southWest else area.southWest upTo area.southEast
-                Direction.EAST -> if (pairDistance < 0) area.northEast upTo area.southEast else area.southEast upTo area.northEast
-                Direction.WEST -> if (pairDistance < 0) area.southWest upTo area.northWest else area.northWest upTo area.southWest
+                Direction.NORTH -> if (pairDistance < 0) area.northWest .. area.northEast else area.northEast .. area.northWest
+                Direction.SOUTH -> if (pairDistance < 0) area.southEast .. area.southWest else area.southWest .. area.southEast
+                Direction.EAST -> if (pairDistance < 0) area.northEast .. area.southEast else area.southEast .. area.northEast
+                Direction.WEST -> if (pairDistance < 0) area.southWest .. area.northWest else area.northWest .. area.southWest
             }
         }
 
@@ -261,115 +257,26 @@ class Day22(
                 }
                 .toList()
         }
+
+        override fun toString(): String {
+            return if (correspondent != null) {
+                "${area.id} $side -> ${correspondent!!.area.id} ${correspondent!!.side}"
+            } else {
+                "${area.id} $side -> null"
+            }
+        }
     }
 
     data class TileTransition(val standingAt: Point, val stepTowards: Direction, val endsUpAt: Point, val lookingIn: Direction)
-    data class CubePaneSwitch(val x: Int, val y: Int, val direction: Direction)
     interface Instruction {
         fun move(map: Grid<Tile>, player: Player)
     }
     data class MoveInstruction(val steps: Int): Instruction {
         override fun move(map: Grid<Tile>, player: Player) {
-            val squareSize = max(map.width, map.height) / 4
             repeat(steps) {
                 val next = player.pos.next(player.direction)
                 if (next == null) {
-                    val x = player.pos.x
-                    val y = player.pos.y
-
-                    // ich hasse mich für die nächsten 80 Zeilen...
-                    val turned: CubePaneSwitch? = if (squareSize == 50) {
-                        if (x in 50..99 && y in 0..49) { // square 1
-                            when(player.direction) {
-                                Direction.NORTH -> CubePaneSwitch(0, 150 + (x - 50), Direction.EAST)
-                                Direction.WEST -> CubePaneSwitch(0, 100 + (49 - y), Direction.EAST)
-                                else -> null
-                            }
-                        } else if (x in 100..149 && y in 0..49) {
-                            when(player.direction) {
-                                Direction.NORTH -> CubePaneSwitch(x - 100,199, Direction.NORTH)
-                                Direction.EAST -> CubePaneSwitch(99, 100 + (49 - y), Direction.WEST)
-                                Direction.SOUTH -> CubePaneSwitch(99, 50 + (x - 100), Direction.WEST)
-                                else -> null
-                            }
-                        } else if (x in 50..99 && y in 50..99) {
-                            when(player.direction) {
-                                Direction.WEST -> CubePaneSwitch(y - 50,100, Direction.SOUTH)
-                                Direction.EAST -> CubePaneSwitch(y + 50,49, Direction.NORTH)
-                                else -> null
-                            }
-                        } else if (x in 0..49 && y in 100..149) {
-                            when(player.direction) {
-                                Direction.WEST -> CubePaneSwitch(50, (149 - y), Direction.EAST)
-                                Direction.NORTH -> CubePaneSwitch(50, x + 50, Direction.EAST)
-                                else -> null
-                            }
-                        } else if (x in 50..99 && y in 100..149) {
-                            when(player.direction) {
-                                Direction.EAST -> CubePaneSwitch(149, 149 - y, Direction.WEST)
-                                Direction.SOUTH -> CubePaneSwitch(49, 150 + (x - 50), Direction.WEST)
-                                else -> null
-                            }
-                        } else if (x in 0..49 && y in 150..199) {
-                            when(player.direction) {
-                                Direction.WEST -> CubePaneSwitch(50 + (y - 150), 0, Direction.SOUTH)
-                                Direction.EAST -> CubePaneSwitch(50 + (y - 150), 149, Direction.NORTH)
-                                Direction.SOUTH -> CubePaneSwitch(100 + x, 0, Direction.SOUTH)
-                                else -> null
-                            }
-                        } else null
-                    } else if (squareSize == 4) {
-                        if (x in 8..11 && y in 0..3) { // square 1
-                            when(player.direction) {
-                                Direction.WEST -> CubePaneSwitch(y + 4, 4, Direction.SOUTH)
-                                Direction.EAST -> CubePaneSwitch(15, 11 - y, Direction.WEST)
-                                Direction.NORTH -> CubePaneSwitch(3 - (x - 8), 4, Direction.SOUTH)
-                                else -> null
-                            }
-                        } else if (x in 0..3 && y in 4..7) {
-                            when(player.direction) {
-                                Direction.NORTH -> CubePaneSwitch(8 + (3 - x), 0, Direction.SOUTH)
-                                Direction.WEST -> CubePaneSwitch(15 - (y - 4), 11, Direction.NORTH)
-                                Direction.SOUTH -> CubePaneSwitch(8 + (3 - x), 11, Direction.NORTH)
-                                else -> null
-                            }
-                        } else if (x in 4..7 && y in 4..7) {
-                            when(player.direction) {
-                                Direction.NORTH -> CubePaneSwitch(8, x - 4, Direction.EAST)
-                                Direction.SOUTH -> CubePaneSwitch(8, 8 + (7 - x), Direction.EAST)
-                                else -> null
-                            }
-                        } else if (x in 8..11 && y in 4..7) {
-                            when(player.direction) {
-                                Direction.EAST -> CubePaneSwitch(12 + (7 - y), 8, Direction.SOUTH)
-                                else -> null
-                            }
-                        } else if (x in 8..11 && y in 8..11) {
-                            when(player.direction) {
-                                Direction.WEST -> CubePaneSwitch(7 - (y - 8), 7, Direction.NORTH)
-                                Direction.SOUTH -> CubePaneSwitch(3 - (x - 8), 7, Direction.NORTH)
-                                else -> null
-                            }
-                        } else if (x in 12..15 && y in 8..11) {
-                            when(player.direction) {
-                                Direction.NORTH -> CubePaneSwitch(11, 4 + (15 - x), Direction.WEST)
-                                Direction.EAST -> CubePaneSwitch(11, 11 - y, Direction.WEST)
-                                Direction.SOUTH -> CubePaneSwitch(0, 4 + (15 - x), Direction.EAST)
-                                else -> null
-                            }
-                        } else null
-                    } else null
-                    if (turned == null) {
-                        throw IllegalStateException("did not find a way to move from ${player.pos} towards ${player.direction}")
-                    }
-                    val p = Point(turned.x, turned.y)
-                    if (map[p] == null) {
-                        throw IllegalStateException("calculcated wrong coordinates for move from ${player.pos} towards ${player.direction}: ${p} is empty")
-                    }
-                    if (!map[p]!!.wall) {
-                        player.pos = map[p]!!
-                        player.direction = turned.direction
-                    }
+                    throw IllegalStateException("did not find a way to move from ${player.pos} towards ${player.direction}")
                 } else if (!next.tile.wall) {
                     player.pos = next.tile
                     player.direction = next.direction

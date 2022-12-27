@@ -29,7 +29,8 @@ class Day14(): AbstractLinesAdventDay<Day14.Result>() {
             map[last] = Element.ROCK
             path.drop(1).forEach { edge ->
                 map.stretchTo(edge)
-                (last upTo edge)
+                (last .. edge)
+                    .drop(1)
                     .forEach { p ->
                         map[p] = Element.ROCK
                     }

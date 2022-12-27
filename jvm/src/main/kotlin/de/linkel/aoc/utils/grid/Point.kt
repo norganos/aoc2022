@@ -21,23 +21,23 @@ data class Point(
         )
     }
 
-    infix fun upTo(p: Point): List<Point> {
+    operator fun rangeTo(p: Point): List<Point> {
         if (p == this) {
-            return emptyList()
+            return listOf(p)
         }
         val vector = p - this
         return if (vector.deltaY == 0) {
-            (0 until abs(vector.deltaX))
+            (0 .. abs(vector.deltaX))
                 .map { i -> this.copy(
-                    x = x + (i+1) * vector.deltaX.sign
+                    x = x + (i) * vector.deltaX.sign
                 )}
         } else if (vector.deltaX == 0) {
-            (0 until abs(vector.deltaY))
+            (0 .. abs(vector.deltaY))
                 .map { i -> this.copy(
-                    y = y + (i+1) * vector.deltaY.sign
+                    y = y + (i) * vector.deltaY.sign
                 )}
         } else {
-            throw IllegalArgumentException("upTo only works in straight lines")
+            throw IllegalArgumentException("rangeTo only works in straight lines")
         }
     }
 

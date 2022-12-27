@@ -9,6 +9,7 @@ data class Area(
     val width: Int,
     val height: Int
 ) {
+    var id = ""
     val origin = Point(x, y)
     val northWest get(): Point = Point(x, y)
     @Suppress("unused")
@@ -36,7 +37,7 @@ data class Area(
     }
 
     override fun toString(): String {
-        return "${width}x${height}@${x}/${y}"
+        return "$id ${width}x${height}@${x}/${y}".trim()
     }
 
     operator fun plus(vector: Vector): Area {

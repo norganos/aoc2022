@@ -15,7 +15,7 @@ data class Vector(
         return Vector(factor * deltaX, factor * deltaY)
     }
     operator fun plus(other: Vector): Vector {
-        return Vector(other.deltaX * deltaX, other.deltaY * deltaY)
+        return Vector(other.deltaX + deltaX, other.deltaY + deltaY)
     }
 
     override fun toString(): String {
