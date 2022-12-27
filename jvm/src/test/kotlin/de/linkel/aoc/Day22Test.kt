@@ -1,5 +1,6 @@
 package de.linkel.aoc
 
+import de.linkel.aoc.base.AbstractFileAdventDay
 import de.linkel.aoc.utils.grid.Point
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -53,7 +54,7 @@ class Day22Test {
      */
 
     @Test
-    fun `test cube side connections 1 W - 3 N`() {
+    fun `test example cube side connections 1 W - 3 N`() {
         val day = Day22(2)
         aocExample.reader().buffered(1024).use { reader ->
             reader.useLines { lines ->
@@ -70,7 +71,7 @@ class Day22Test {
     }
 
     @Test
-    fun `test cube side connections 1 E - 6 E`() {
+    fun `test example cube side connections 1 E - 6 E`() {
         val day = Day22(2)
         aocExample.reader().buffered(1024).use { reader ->
             reader.useLines { lines ->
@@ -87,7 +88,7 @@ class Day22Test {
     }
 
     @Test
-    fun `test cube side connections 1 N - 2 N`() {
+    fun `test example cube side connections 1 N - 2 N`() {
         val day = Day22(2)
         aocExample.reader().buffered(1024).use { reader ->
             reader.useLines { lines ->
@@ -104,7 +105,7 @@ class Day22Test {
     }
 
     @Test
-    fun `test cube side connections 2 W - 6 S`() {
+    fun `test example cube side connections 2 W - 6 S`() {
         val day = Day22(2)
         aocExample.reader().buffered(1024).use { reader ->
             reader.useLines { lines ->
@@ -121,7 +122,7 @@ class Day22Test {
     }
 
     @Test
-    fun `test cube side connections 2 S - 5 S`() {
+    fun `test example cube side connections 2 S - 5 S`() {
         val day = Day22(2)
         aocExample.reader().buffered(1024).use { reader ->
             reader.useLines { lines ->
@@ -138,7 +139,7 @@ class Day22Test {
     }
 
     @Test
-    fun `test cube side connections 3 S - 5 W`() {
+    fun `test example cube side connections 3 S - 5 W`() {
         val day = Day22(2)
         aocExample.reader().buffered(1024).use { reader ->
             reader.useLines { lines ->
@@ -155,7 +156,7 @@ class Day22Test {
     }
 
     @Test
-    fun `test cube side connections 4 E - 6 N`() {
+    fun `test example cube side connections 4 E - 6 N`() {
         val day = Day22(2)
         aocExample.reader().buffered(1024).use { reader ->
             reader.useLines { lines ->
@@ -193,5 +194,124 @@ class Day22Test {
             109224,
             Day22(2).solve(emptyList()).value
         )
+    }
+
+    @Test
+    fun `test solution cube side connections 1 N - 6 W`() {
+        val day = Day22(2)
+        AbstractFileAdventDay.from(emptyList<String>(), "input22.txt").use { reader ->
+            reader.useLines { lines ->
+                val (map, _) = day.parse(lines)
+                day.interconnect(map)
+
+                // 1 N <=> 6 W
+                assertEquals(Pair(Point(0, 150), Day22.Direction.EAST), map[Point(50, 0)]!!.north!!.pointDir())
+                assertEquals(Pair(Point(50, 0), Day22.Direction.SOUTH), map[Point(0, 150)]!!.west!!.pointDir())
+                assertEquals(Pair(Point(0, 199), Day22.Direction.EAST), map[Point(99, 0)]!!.north!!.pointDir())
+                assertEquals(Pair(Point(99, 0), Day22.Direction.SOUTH), map[Point(0, 199)]!!.west!!.pointDir())
+            }
+        }
+    }
+
+    @Test
+    fun `test solution cube side connections 1 W - 4 W`() {
+        val day = Day22(2)
+        AbstractFileAdventDay.from(emptyList<String>(), "input22.txt").use { reader ->
+            reader.useLines { lines ->
+                val (map, _) = day.parse(lines)
+                day.interconnect(map)
+
+                // 1 W <=> 4 W
+                assertEquals(Pair(Point(0, 100), Day22.Direction.EAST), map[Point(50, 49)]!!.west!!.pointDir())
+                assertEquals(Pair(Point(50, 49), Day22.Direction.EAST), map[Point(0, 100)]!!.west!!.pointDir())
+                assertEquals(Pair(Point(0, 149), Day22.Direction.EAST), map[Point(50, 0)]!!.west!!.pointDir())
+                assertEquals(Pair(Point(50, 0), Day22.Direction.EAST), map[Point(0, 149)]!!.west!!.pointDir())
+            }
+        }
+    }
+
+    @Test
+    fun `test solution cube side connections 2 N - 6 S`() {
+        val day = Day22(2)
+        AbstractFileAdventDay.from(emptyList<String>(), "input22.txt").use { reader ->
+            reader.useLines { lines ->
+                val (map, _) = day.parse(lines)
+                day.interconnect(map)
+
+                // 2 N <=> 6 S
+                assertEquals(Pair(Point(0, 199), Day22.Direction.NORTH), map[Point(100, 0)]!!.north!!.pointDir())
+                assertEquals(Pair(Point(100, 0), Day22.Direction.SOUTH), map[Point(0, 199)]!!.south!!.pointDir())
+                assertEquals(Pair(Point(49, 199), Day22.Direction.NORTH), map[Point(149, 0)]!!.north!!.pointDir())
+                assertEquals(Pair(Point(149, 0), Day22.Direction.SOUTH), map[Point(49, 199)]!!.south!!.pointDir())
+            }
+        }
+    }
+
+    @Test
+    fun `test solution cube side connections 2 E - 5 E`() {
+        val day = Day22(2)
+        AbstractFileAdventDay.from(emptyList<String>(), "input22.txt").use { reader ->
+            reader.useLines { lines ->
+                val (map, _) = day.parse(lines)
+                day.interconnect(map)
+
+                // 2 E <=> 5 E
+                assertEquals(Pair(Point(99, 149), Day22.Direction.WEST), map[Point(149, 0)]!!.east!!.pointDir())
+                assertEquals(Pair(Point(149, 0), Day22.Direction.WEST), map[Point(99, 149)]!!.east!!.pointDir())
+                assertEquals(Pair(Point(99, 100), Day22.Direction.WEST), map[Point(149, 49)]!!.east!!.pointDir())
+                assertEquals(Pair(Point(149, 49), Day22.Direction.WEST), map[Point(99, 100)]!!.east!!.pointDir())
+            }
+        }
+    }
+
+    @Test
+    fun `test solution cube side connections 2 S - 3 E`() {
+        val day = Day22(2)
+        AbstractFileAdventDay.from(emptyList<String>(), "input22.txt").use { reader ->
+            reader.useLines { lines ->
+                val (map, _) = day.parse(lines)
+                day.interconnect(map)
+
+                // 2 S <=> 3 E
+                assertEquals(Pair(Point(99, 99), Day22.Direction.WEST), map[Point(149, 49)]!!.south!!.pointDir())
+                assertEquals(Pair(Point(149, 49), Day22.Direction.NORTH), map[Point(99, 99)]!!.east!!.pointDir())
+                assertEquals(Pair(Point(99, 50), Day22.Direction.WEST), map[Point(100, 49)]!!.south!!.pointDir())
+                assertEquals(Pair(Point(100, 49), Day22.Direction.NORTH), map[Point(99, 50)]!!.east!!.pointDir())
+            }
+        }
+    }
+
+    @Test
+    fun `test solution cube side connections 3 W - 4 N`() {
+        val day = Day22(2)
+        AbstractFileAdventDay.from(emptyList<String>(), "input22.txt").use { reader ->
+            reader.useLines { lines ->
+                val (map, _) = day.parse(lines)
+                day.interconnect(map)
+
+                // 3 W <=> 4 N
+                assertEquals(Pair(Point(49, 100), Day22.Direction.SOUTH), map[Point(50, 99)]!!.west!!.pointDir())
+                assertEquals(Pair(Point(50, 99), Day22.Direction.EAST), map[Point(49, 100)]!!.north!!.pointDir())
+                assertEquals(Pair(Point(0, 100), Day22.Direction.SOUTH), map[Point(50, 50)]!!.west!!.pointDir())
+                assertEquals(Pair(Point(50, 50), Day22.Direction.EAST), map[Point(0, 100)]!!.north!!.pointDir())
+            }
+        }
+    }
+
+    @Test
+    fun `test solution cube side connections 5 S - 6 E`() {
+        val day = Day22(2)
+        AbstractFileAdventDay.from(emptyList<String>(), "input22.txt").use { reader ->
+            reader.useLines { lines ->
+                val (map, _) = day.parse(lines)
+                day.interconnect(map)
+
+                // 5 S <=> 6 E
+                assertEquals(Pair(Point(49, 199), Day22.Direction.WEST), map[Point(99, 149)]!!.south!!.pointDir())
+                assertEquals(Pair(Point(99, 149), Day22.Direction.NORTH), map[Point(49, 199)]!!.east!!.pointDir())
+                assertEquals(Pair(Point(49, 150), Day22.Direction.WEST), map[Point(50, 149)]!!.south!!.pointDir())
+                assertEquals(Pair(Point(50, 149), Day22.Direction.NORTH), map[Point(49, 150)]!!.east!!.pointDir())
+            }
+        }
     }
 }

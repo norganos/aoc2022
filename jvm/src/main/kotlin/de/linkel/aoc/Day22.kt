@@ -192,10 +192,12 @@ class Day22(
                     if (e.distanceTo(n) == 1 && e.payload.side == n.payload.side) {
                         continue
                     }
+                    val en = e.distanceTo(n)
+                    val ne = n.distanceTo(e)
                     n.payload.correspondent = e.payload
                     e.payload.correspondent = n.payload
-                    e.payload.pairDistance = e.distanceTo(n)
-                    n.payload.pairDistance = n.distanceTo(e)
+                    e.payload.pairDistance = en
+                    n.payload.pairDistance = if (en == ne) -en else ne
                     areaConnections[n.payload.area]!!.add(e.payload.area)
                     areaConnections[e.payload.area]!!.add(n.payload.area)
                 }
@@ -230,6 +232,15 @@ class Day22(
         override fun toString(): String {
             return "${area.id} $side"
         }
+
+        fun points(): List<Point> {
+            return when (side) {
+                Direction.NORTH -> area.northWest .. area.northEast
+                Direction.SOUTH -> area.southEast .. area.southWest
+                Direction.EAST -> area.northEast .. area.southEast
+                Direction.WEST -> area.southWest .. area.northWest
+            }
+        }
     }
     data class PairableEdge(
         val edge: Edge
@@ -241,12 +252,7 @@ class Day22(
         val paired get(): Boolean = correspondent != null
 
         fun points(): List<Point> {
-            return when (side) {
-                Direction.NORTH -> if (pairDistance < 0) area.northWest .. area.northEast else area.northEast .. area.northWest
-                Direction.SOUTH -> if (pairDistance < 0) area.southEast .. area.southWest else area.southWest .. area.southEast
-                Direction.EAST -> if (pairDistance < 0) area.northEast .. area.southEast else area.southEast .. area.northEast
-                Direction.WEST -> if (pairDistance < 0) area.southWest .. area.northWest else area.northWest .. area.southWest
-            }
+            return if (pairDistance < 0) edge.points() else edge.points().reversed()
         }
 
         fun transitions(): List<TileTransition> {
@@ -368,3 +374,51 @@ class Day22(
         }
     }
 }
+
+
+
+/*
+
+
+
+if (x in 50..99 && y in 0..49) { // square 1
+    when(player.direction) {
+        Direction.NORTH -> CubePaneSwitch(0, 150 + (x - 50), Direction.EAST)
+        Direction.WEST -> CubePaneSwitch(0, 100 + (49 - y), Direction.EAST)
+        else -> null
+    }
+} else if (x in 100..149 && y in 0..49) {
+    when(player.direction) {
+        Direction.NORTH -> CubePaneSwitch(x - 100,199, Direction.NORTH)
+        Direction.EAST -> CubePaneSwitch(99, 100 + (49 - y), Direction.WEST)
+        Direction.SOUTH -> CubePaneSwitch(99, 50 + (x - 100), Direction.WEST)
+        else -> null
+    }
+} else if (x in 50..99 && y in 50..99) {
+    when(player.direction) {
+        Direction.WEST -> CubePaneSwitch(y - 50,100, Direction.SOUTH)
+        Direction.EAST -> CubePaneSwitch(y + 50,49, Direction.NORTH)
+        else -> null
+    }
+} else if (x in 0..49 && y in 100..149) {
+    when(player.direction) {
+        Direction.WEST -> CubePaneSwitch(50, (149 - y), Direction.EAST)
+        Direction.NORTH -> CubePaneSwitch(50, x + 50, Direction.EAST)
+        else -> null
+    }
+} else if (x in 50..99 && y in 100..149) {
+    when(player.direction) {
+        Direction.EAST -> CubePaneSwitch(149, 149 - y, Direction.WEST)
+        Direction.SOUTH -> CubePaneSwitch(49, 150 + (x - 50), Direction.WEST)
+        else -> null
+    }
+} else if (x in 0..49 && y in 150..199) {
+    when(player.direction) {
+        Direction.WEST -> CubePaneSwitch(50 + (y - 150), 0, Direction.SOUTH)
+        Direction.EAST -> CubePaneSwitch(50 + (y - 150), 149, Direction.NORTH)
+        Direction.SOUTH -> CubePaneSwitch(100 + x, 0, Direction.SOUTH)
+        else -> null
+    }
+}
+
+ */
