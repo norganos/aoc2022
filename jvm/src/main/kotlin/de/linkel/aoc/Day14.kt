@@ -17,7 +17,7 @@ class Day14(): AbstractLinesAdventDay<Day14.Result>() {
     )
 
     override fun process(lines: Sequence<String>): Result {
-        val map = Grid<Element>(Point(0, 0))
+        val map = Grid<Element>(Point(500, 0))
         lines.forEach { line ->
             val path = line.split(" -> ")
                 .map {
@@ -53,7 +53,7 @@ class Day14(): AbstractLinesAdventDay<Day14.Result>() {
         // we reuse the map from part 1 as sand would fill up in the same way first
 
         val box = map.getDataBoundingBox()
-        val corridor = box.y + box.height + 1
+        val corridor = box.y + box.height
         map.stretchTo(Point(box.x-box.height, corridor))
         map.stretchTo(Point(box.x+box.width+box.height, corridor))
         var sandCounter2 = sandCounter1

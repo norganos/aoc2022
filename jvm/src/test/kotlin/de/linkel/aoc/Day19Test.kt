@@ -25,13 +25,13 @@ Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsid
 //        )
 //    }
 
-    @Test
-    fun `solution part 1`() {
-        assertEquals(
-            1681,
-            Day19(24, -1).solve(emptyList()).qualityLevels
-        )
-    }
+//    @Test
+//    fun `solution part 1`() {
+//        assertEquals(
+//            1681,
+//            Day19(24, -1).solve(emptyList()).qualityLevels
+//        )
+//    }
 
 //    @Test
 //    fun `solution part 2`() {
