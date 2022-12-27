@@ -38,4 +38,11 @@ data class Area(
     override fun toString(): String {
         return "${width}x${height}@${x}/${y}"
     }
+
+    operator fun plus(vector: Vector): Area {
+        return copy(
+            x = x + vector.deltaX,
+            y = y + vector.deltaY
+        )
+    }
 }
